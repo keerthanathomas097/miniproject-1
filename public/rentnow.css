@@ -1,0 +1,189 @@
+/* Main Container Styles */
+.product-details-container {
+    padding: 60px 40px;
+    background-color: #fff;
+    margin: 30px 80px;
+    max-width: 1400px;
+}
+
+/* Image Gallery Styles */
+.image-gallery {
+    display: flex;
+    gap: 20px;
+}
+
+.thumbnails {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.thumbnail {
+    width: 80px;
+    height: 100px;
+    object-fit: cover;
+    cursor: pointer;
+    border: 2px solid transparent;
+    border-radius: 4px;
+    transition: border-color 0.3s ease;
+}
+
+.thumbnail.active {
+    border-color: #8d2626;
+}
+
+.main-image {
+    flex-grow: 1;
+}
+
+.main-image img {
+    width: 100%;
+    max-height: 600px;
+    object-fit: contain;
+    border-radius: 8px;
+}
+
+/* Product Info Styles */
+.product-info {
+    padding: 0 20px;
+}
+
+.product-title {
+    font-size: 28px;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.product-price {
+    font-size: 24px;
+    color: #8d2626;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+/* Size Chart Icon */
+.size-chart {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    cursor: pointer;
+    color: #666;
+}
+
+/* Form Styles */
+.measurements-form,
+.size-selection,
+.rental-duration,
+.date-selection {
+    margin-bottom: 30px;
+}
+
+h4 {
+    color: #333;
+    margin-bottom: 15px;
+    font-size: 18px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: #666;
+}
+
+.form-control {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+/* Size Buttons */
+.size-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.size-btn {
+    padding: 8px 20px;
+    border: 2px solid #8d2626;
+    background: none;
+    color: #8d2626;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.size-btn:hover,
+.size-btn.active {
+    background-color: #8d2626;
+    color: white;
+}
+
+/* Duration Options */
+.duration-options {
+    display: flex;
+    gap: 20px;
+}
+
+.duration-options label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+}
+
+/* Date Selection */
+.rental-dates {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+/* Submit Button */
+.submit-btn {
+    width: 100%;
+    padding: 12px;
+    background-color: #8d2626;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 18px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.submit-btn:hover {
+    background-color: #702020;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .image-gallery {
+        flex-direction: column-reverse;
+    }
+
+    .thumbnails {
+        flex-direction: row;
+        overflow-x: auto;
+    }
+
+    .thumbnail {
+        width: 60px;
+        height: 80px;
+    }
+
+    .rental-dates {
+        grid-template-columns: 1fr;
+    }
+
+    .product-details-container {
+        margin: 30px 20px;
+    }
+}

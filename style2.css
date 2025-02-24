@@ -1,0 +1,360 @@
+/* Sidebar Styling */
+#navItem1
+{
+  color:rgb(55, 70, 65);
+
+
+  font-family: Roboto;
+  font-size: larger;
+  margin-left: 10px;
+}
+#navItem2
+{
+  
+  color:rgb(55, 70, 65);
+  font-family: Roboto;
+  font-size: larger;
+  margin-left: 10px;
+
+}
+#navItem3
+{
+  color:rgb(55, 70, 65);
+ font-family: Roboto;
+  font-size: larger;  margin-left: 10px;
+
+}
+#navItem4
+{
+  color:rgb(55, 70, 65);
+  
+  margin-left: 10px;
+
+
+  font-family: Roboto;
+  font-size: larger;
+}
+#navItemIcon1
+{
+  color:rgb(55, 70, 65);
+  margin-left: 10px;
+
+
+}
+#navItemIcon2
+{
+  color:rgb(55, 70, 65);
+  margin-left: 10px;
+
+
+}
+
+.clover-logo
+{
+  height:80px;
+  height:80px;
+  margin-left: 0px;
+}
+.icon-large
+{
+  font-size: 2rem;
+}
+.sidebar-fixed {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 25%;
+  height: 100vh;
+  overflow-y: auto;
+  background-color: #f0f0f0; /* Light grey background */
+  padding: 20px;
+  box-shadow: 2px 0px 15px rgba(0, 0, 0, 0.1);
+  z-index: 1030;
+  transition: all 0.3s ease-in-out;
+}
+
+.sidebar-fixed h4 {
+  color: #6e6e6e; /* Medium grey text */
+  font-size: 18px;
+  margin-bottom: 20px;
+  font-weight: 600;
+}
+
+/* Accordion Button Styling */
+.accordion-button {
+  background-color: #d9d9d9; /* Light grey */
+  color: #4f4f4f; /* Dark grey text */
+  border: none;
+  padding: 12px;
+  font-size: 16px;
+  text-align: left;
+  width: 100%;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+
+.accordion-button:hover {
+  background-color: #cfcfcf; /* Slightly darker light grey on hover */
+}
+
+.accordion-button:focus {
+  box-shadow: none;
+}
+
+/* Accordion Collapse and Body */
+.accordion-collapse {
+  background-color: #f7f7f7; /* Very light grey */
+  border: 1px solid #dddddd;
+  border-radius: 4px;
+}
+
+.accordion-body {
+  padding: 10px;
+  background-color: #fafafa; /* Very light grey */
+}
+
+.accordion-body input[type="checkbox"] {
+  margin-right: 8px;
+  accent-color: #bbbbbb; /* Light grey */
+}
+
+.accordion-body input[type="checkbox"]:checked {
+  accent-color: #9c9c9c; /* Slightly darker light grey */
+}
+
+/* Hover Effects */
+.accordion-item:hover {
+  background-color: #ebebeb; /* Light grey */
+  border-radius: 4px;
+  margin-bottom: 10px;
+}
+
+/* Main Content Area */
+.main-content {
+  margin-left: 25%;
+  padding: 20px;
+  background-color: #f5f5f5; /* Light grey */
+}
+
+/* Card Styling */
+.card {
+  background-color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Product Grid Styling */
+#productGrid .col-md-4 {
+  flex: 0 0 33.333%;
+  max-width: 33.333%;
+  padding: 10px; /* Add spacing between cards */
+}
+
+/* Rent Now Button Styling */
+.btn-pink {
+  background-color: #8d2626; /* Bright pink */
+  color: #ffffff; /* White text */
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  text-transform: uppercase;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.btn-pink:hover {
+  background-color: #8b2020; /* Darker pink on hover */
+  transform: scale(1.05); /* Slightly enlarge on hover */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Add shadow on hover */
+}
+
+.btn-pink:focus {
+  outline: none;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); /* Add stronger shadow on focus */
+}
+
+/* Accordion Button Styling */
+.accordion-button {
+  background-color: #d9d9d9; /* Light grey */
+  color: #4f4f4f; /* Dark grey text */
+  border: none;
+  padding: 12px;
+  font-size: 16px;
+  text-align: left;
+  width: 100%;
+  border-radius: 4px;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.accordion-button:hover {
+  background-color: #cfcfcf; /* Slightly darker light grey on hover */
+}
+
+.accordion-button:focus, .accordion-button:not(.collapsed) {
+  background-color: #bfbfbf; /* Darker grey on click */
+  color: #423e3e; /* White text on click */
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  transform: scale(1.02); /* Slightly enlarge on click */
+}
+
+.accordion-button:focus {
+  outline: none;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); /* Stronger shadow on focus */
+}
+
+/* Spacing Between Accordion Items */
+.accordion-item {
+  margin-bottom: 15px; /* Increase space between accordion items */
+}
+
+/* Checkbox Styling */
+.accordion-body input[type="checkbox"] {
+  margin-right: 8px;
+  width: 18px; /* Increase checkbox size */
+  height: 18px; /* Increase checkbox size */
+  accent-color: #bbbbbb; /* Light grey */
+}
+
+.accordion-body input[type="checkbox"]:checked {
+  accent-color: #9c9c9c; /* Slightly darker light grey */
+}
+
+/* Custom Accordion Button Styling */
+.accordion-button::after {
+  content: '+'; /* Default icon */
+  font-size: 20px;
+  font-weight: bold;
+  color: #4f4f4f; /* Dark grey */
+  margin-left: auto;
+  transition: transform 0.3s ease;
+}
+
+.accordion-button:not(.collapsed)::after {
+  content: '-'; /* Icon when expanded */
+}
+
+/* Hide default Bootstrap accordion icon */
+.accordion-button::after {
+  display: none; /* Hide the default icon */
+}
+
+.accordion-button::before {
+  content: '+'; /* Default icon */
+  font-size: 20px;
+  font-weight: bold;
+  color: #4f4f4f; /* Dark grey */
+  transition: transform 0.3s ease;
+}
+
+/* Card Image Styling */
+.card-img-top {
+  width: 100%; /* Ensures the image takes up the full width of the card */
+  height: 450px; /* Sets a fixed height for all images */
+  object-fit: cover; /* Ensures images are cropped to fit the set dimensions */
+}
+
+/* Card Styling */
+.card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%; /* Ensures all cards have the same height */
+  min-height: 350px; /* Sets a minimum height for all cards */
+}
+/* Navbar Styling */
+.navbar {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 1030; /* Ensure it appears above other elements */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional: Add shadow for better visibility */
+}
+
+/* Adjust padding for the main content to account for the fixed navbar */
+body {
+  padding-top: 70px; /* Adjust this value based on your navbar height */
+}
+
+/* Sidebar Styling */
+.sidebar-fixed {
+  top: 70px; /* Adjust this value to match the navbar height */
+  margin-top: 0;
+  position: fixed;
+  width: 25%; /* Ensure the width is consistent */
+  height: calc(100vh - 70px); /* Adjust the height to fit the viewport minus the navbar height */
+  overflow-y: auto;
+}
+
+/* Main Content Area */
+.main-content {
+  margin-left: 25%;
+  padding: 20px;
+  background-color: #f5f5f5; /* Light grey */
+}
+
+/* Modal styles */
+/* .modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+    background-color: #fff;
+    margin: 5% auto;
+    padding: 20px;
+    width: 80%;
+    max-width: 800px;
+    position: relative;
+    border-radius: 8px;
+}
+
+.close {
+    position: absolute;
+    right: 20px;
+    top: 10px;
+    font-size: 28px;
+    cursor: pointer;
+}
+
+.modal-main-image {
+    width: 100%;
+    max-height: 500px;
+    object-fit: contain;
+    margin-bottom: 20px;
+}
+
+.rental-thumbnail-container {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    justify-content: center;
+}
+
+.rental-thumbnail {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    cursor: pointer;
+    border: 2px solid transparent;
+}
+
+.rental-thumbnail.active {
+    border-color: #8d2626;
+} */
