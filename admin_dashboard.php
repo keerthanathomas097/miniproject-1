@@ -103,7 +103,7 @@ $result = $conn->query($query);
             position: fixed;
             left: 0;
             top: 0;
-            background: #2c3e50;
+            background:rgb(91, 9, 9);
             color: white;
             padding-top: 20px;
         }
@@ -115,13 +115,13 @@ $result = $conn->query($query);
             display: block;
             transition: 0.3s;
         }
-        .sidebar-link:hover { background: #34495e; color: #ecf0f1; }
+        .sidebar-link:hover { background:rgb(147, 42, 42); color: #ecf0f1; }
         .card {
             border: none;
             border-radius: 10px;
             box-shadow: 0 0 15px rgba(0,0,0,0.1);
         }
-        .stat-card { background: linear-gradient(45deg, #3498db, #2980b9); color: white; }
+        .stat-card { background: linear-gradient(45deg,rgb(205, 38, 38),rgb(99, 7, 7)); color: white; }
         .table { font-size: 0.9rem; }
         .table thead th { background-color: #f8f9fa; font-weight: 600; }
         .badge { padding: 6px 12px; font-weight: 500; letter-spacing: 0.3px; }

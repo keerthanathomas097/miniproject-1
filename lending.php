@@ -494,13 +494,14 @@ if (empty($_POST['email'])) {
                 </div>
             <?php endif; ?>
 
-            <form method="POST" enctype="multipart/form-data">
+            <form method="POST" enctype="multipart/form-data" id="outfitForm" novalidate>
         <h4 class="section-title">Outfit Images</h4>
         <div class="row mb-4">
             <div class="col-md-4">
                 <div class="image-preview">
-                    <label class="form-label">Image 1</label>
-                    <input type="file" class="form-control" name="image1" accept="image/*">
+                    <label class="form-label">Image 1 *</label>
+                    <input type="file" class="form-control" name="image1" id="image1" accept="image/*">
+                    <span class="error-message" id="image1Error"></span>
                 </div>
             </div>
             <div class="col-md-4">
@@ -572,12 +573,16 @@ if (empty($_POST['email'])) {
 
         <div class="row mb-3">
             <div class="col-md-6">
-                <label class="form-label">Year of Purchase</label>
-                <input type="number" class="form-control" name="purchaseYear" value="<?php echo htmlspecialchars($_POST['purchaseYear'] ?? ''); ?>">
+                <label class="form-label">Year of Purchase *</label>
+                <input type="number" class="form-control" id="purchaseYear" name="purchaseYear" 
+                       min="2000" max="2024" value="<?php echo htmlspecialchars($_POST['purchaseYear'] ?? ''); ?>">
+                <span class="error-message" id="purchaseYearError"></span>
             </div>
             <div class="col-md-6">
-                <label class="form-label">MRP (₹)</label>
-                <input type="number" class="form-control" name="mrp" value="<?php echo htmlspecialchars($_POST['mrp'] ?? ''); ?>">
+                <label class="form-label">MRP (₹) *</label>
+                <input type="number" class="form-control" id="mrp" name="mrp" 
+                       min="30000" value="<?php echo htmlspecialchars($_POST['mrp'] ?? ''); ?>">
+                <span class="error-message" id="mrpError"></span>
             </div>
         </div>
 
@@ -745,6 +750,329 @@ if (empty($_POST['email'])) {
         });
     });
     </script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('outfitForm');
+        const submitBtn = document.getElementById('submitBtn');
+        
+        // Validation rules
+        const validationRules = {
+            image1: {
+                validate: (input) => {
+                    if (!input.files.length) return 'Image 1 is required';
+                    const file = input.files[0];
+                    if (!['image/jpeg', 'image/png', 'image/jpg'].includes(file.type)) {
+                        return 'Please upload a valid image file (JPG, JPEG, PNG)';
+                    }
+                    if (file.size > 5 * 1024 * 1024) {
+                        return 'Image must be less than 5MB';
+                    }
+                    return '';
+                }
+            },
+            brand_id: {
+                validate: (input) => input.value ? '' : 'Please select a brand'
+            },
+            email: {
+                validate: (input) => {
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (!input.value) return 'Email is required';
+                    if (!emailRegex.test(input.value)) return 'Please enter a valid email address';
+                    return '';
+                }
+            },
+            size_id: {
+                validate: (input) => input.value ? '' : 'Please select a size'
+            },
+            type_id: {
+                validate: (input) => input.value ? '' : 'Please select a category'
+            },
+            purchaseYear: {
+                validate: (input) => {
+                    const year = parseInt(input.value);
+                    const currentYear = new Date().getFullYear();
+                    if (!input.value) return 'Purchase year is required';
+                    if (year < 2000 || year > currentYear) {
+                        return `Year must be between 2000 and ${currentYear}`;
+                    }
+                    return '';
+                }
+            },
+            mrp: {
+                validate: (input) => {
+                    if (!input.value) return 'MRP is required';
+                    if (!/^\d+$/.test(input.value)) return 'Please enter a valid number';
+                    if (parseInt(input.value) <= 0) return 'MRP must be greater than 0';
+                    return '';
+                }
+            },
+            address: {
+                validate: (input) => {
+                    if (!input.value.trim()) return 'Address is required';
+                    if (input.value.trim().length < 10) return 'Please enter a complete address';
+                    return '';
+                }
+            },
+            city: {
+                validate: (input) => {
+                    if (!input.value.trim()) return 'City is required';
+                    if (input.value.trim().length < 3) return 'Please enter a valid city name';
+                    return '';
+                }
+            },
+            hasBill: {
+                validate: (input) => input.value ? '' : 'Please specify if you have a bill'
+            }
+        };
+
+        // Function to validate a single field
+        function validateField(input) {
+            const rule = validationRules[input.id];
+            if (!rule) return true;
+
+            const errorElement = document.getElementById(`${input.id}Error`);
+            if (!errorElement) return true;
+
+            const errorMessage = rule.validate(input);
+            errorElement.textContent = errorMessage;
+            errorElement.style.display = errorMessage ? 'block' : 'none';
+
+            return !errorMessage;
+        }
+
+        // Add validation listeners to all form fields
+        Object.keys(validationRules).forEach(fieldId => {
+            const input = document.getElementById(fieldId);
+            if (input) {
+                input.addEventListener('input', () => {
+                    validateField(input);
+                    checkFormValidity();
+                });
+                input.addEventListener('change', () => {
+                    validateField(input);
+                    checkFormValidity();
+                });
+            }
+        });
+
+        // Check if all fields are valid
+        function checkFormValidity() {
+            const isValid = Object.keys(validationRules).every(fieldId => {
+                const input = document.getElementById(fieldId);
+                return input && validateField(input);
+            });
+            
+            submitBtn.disabled = !isValid;
+            return isValid;
+        }
+
+        // Form submission handler
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            if (checkFormValidity()) {
+                // If using AJAX:
+                const formData = new FormData(form);
+                fetch('lending.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.text())
+                .then(data => {
+                    if (data.includes('success')) {
+                        alert('Outfit listed successfully!');
+                        form.reset();
+                    } else {
+                        alert('There was an error. Please try again.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred. Please try again.');
+                });
+            }
+        });
+    });
+    </script>
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Get all form elements
+    const form = document.getElementById('outfitForm');
+    const inputs = form.querySelectorAll('input, select, textarea');
+    const submitButton = form.querySelector('button[type="submit"]');
+
+    // Validation rules
+    const validationRules = {
+        brand_id: {
+            required: true,
+            message: 'Please select a brand'
+        },
+        email: {
+            required: true,
+            pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+            message: 'Please enter a valid email address'
+        },
+        size_id: {
+            required: true,
+            message: 'Please select a size'
+        },
+        type_id: {
+            required: true,
+            message: 'Please select a category'
+        },
+        purchaseYear: {
+            required: true,
+            validate: (value) => {
+                const year = parseInt(value);
+                if (isNaN(year)) return 'Please enter a valid year';
+                if (year < 2000) return 'Year must be 2000 or later';
+                if (year > 2024) return 'Year cannot be greater than 2024';
+                return '';
+            }
+        },
+        mrp: {
+            required: true,
+            validate: (value) => {
+                const price = parseInt(value);
+                if (isNaN(price)) return 'Please enter a valid price';
+                if (price < 30000) return 'MRP must be at least ₹30,000';
+                if (price > 1000000) return 'MRP seems too high, please verify';
+                return '';
+            }
+        },
+        address: {
+            required: true,
+            minLength: 10,
+            message: 'Please enter a complete address (minimum 10 characters)'
+        },
+        city: {
+            required: true,
+            minLength: 3,
+            message: 'Please enter a valid city name'
+        },
+        hasBill: {
+            required: true,
+            message: 'Please specify if you have a bill'
+        }
+    };
+
+    // Function to validate a single field
+    function validateField(input) {
+        const fieldName = input.id || input.name;
+        const errorSpan = document.getElementById(`${fieldName}Error`) || 
+                         input.parentElement.querySelector('.error-message');
+        
+        if (!errorSpan) return true;
+
+        const rule = validationRules[fieldName];
+        if (!rule) return true;
+
+        let errorMessage = '';
+
+        // Check if empty when required
+        if (rule.required && !input.value.trim()) {
+            errorMessage = `This field is required`;
+        }
+        // Check custom validation if exists
+        else if (rule.validate && input.value.trim()) {
+            errorMessage = rule.validate(input.value.trim());
+        }
+        // Check pattern if exists
+        else if (rule.pattern && input.value.trim() && !rule.pattern.test(input.value.trim())) {
+            errorMessage = rule.message;
+        }
+        // Check minLength if exists
+        else if (rule.minLength && input.value.trim().length < rule.minLength) {
+            errorMessage = rule.message;
+        }
+
+        // Show/hide error message
+        errorSpan.textContent = errorMessage;
+        errorSpan.style.display = errorMessage ? 'block' : 'none';
+
+        // Add/remove invalid class
+        if (errorMessage) {
+            input.classList.add('is-invalid');
+            input.classList.remove('is-valid');
+        } else {
+            input.classList.add('is-valid');
+            input.classList.remove('is-invalid');
+        }
+
+        return !errorMessage;
+    }
+
+    // Add live validation to all inputs
+    inputs.forEach(input => {
+        ['input', 'change', 'blur'].forEach(eventType => {
+            input.addEventListener(eventType, function() {
+                validateField(this);
+                checkFormValidity();
+            });
+        });
+    });
+
+    // Check entire form validity
+    function checkFormValidity() {
+        let isValid = true;
+        inputs.forEach(input => {
+            if (!validateField(input)) {
+                isValid = false;
+            }
+        });
+        submitButton.disabled = !isValid;
+        return isValid;
+    }
+
+    // Form submission handler
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        if (checkFormValidity()) {
+            // Proceed with form submission
+            this.submit();
+        } else {
+            // Show all error messages
+            inputs.forEach(input => validateField(input));
+            
+            // Scroll to first error
+            const firstError = form.querySelector('.is-invalid');
+            if (firstError) {
+                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+    });
+});
+</script>
+
+<style>
+.error-message {
+    color: #dc3545;
+    font-size: 0.875em;
+    margin-top: 0.25rem;
+    display: none;
+}
+
+.form-control.is-invalid,
+.form-select.is-invalid {
+    border-color: #dc3545;
+    padding-right: calc(1.5em + 0.75rem);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+
+.form-control.is-valid,
+.form-select.is-valid {
+    border-color: #198754;
+    padding-right: calc(1.5em + 0.75rem);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23198754' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+</style>
 </body>
 </html>
 

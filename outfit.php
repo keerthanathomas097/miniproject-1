@@ -48,9 +48,15 @@ include 'connect.php';  // Make sure this path is correct
             <a href="cart.php" class="icon-link">
               <i class="bi bi-bag"></i>
             </a>
-            <a href="profile.php" class="icon-link">
-              <i class="bi bi-person"></i>
-            </a>
+            <div class="dropdown">
+                    <a class="icon-link" id="profileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                      <i class="bi bi-person"></i>
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="profileDropdown">
+                      <li><a class="dropdown-item" href="profile.php">Profile</a></li>
+                      <li><a class="dropdown-item" href="logout.php">Logout</a></li>
+                    </ul>
+                  </div>
             <a href="index.php" class="icon-link">
               <i class="bi bi-house"></i>
             </a>
