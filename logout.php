@@ -1,6 +1,15 @@
 <?php
 session_start();
+
+// Destroy all session data
 session_destroy();
-header("Location: index.php");
-exit;
+
+// Clear session cookies
+if (isset($_COOKIE[session_name()])) {
+    setcookie(session_name(), '', time()-3600, '/');
+}
+
+// Redirect to login page
+header("Location: ls.php");
+exit();
 ?>

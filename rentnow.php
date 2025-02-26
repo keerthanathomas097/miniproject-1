@@ -49,10 +49,54 @@ $outfit_images = $images_result->fetch_all(MYSQLI_ASSOC);
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="rentnow.css">
+    <link rel="stylesheet" href="styles/navbar.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
+    <nav class="navbar navbar-expand-lg main-navbar">
+        <div class="container">
+            <a class="navbar-brand" href="index.php">
+                <img src="images/logo.png" alt="Clover Logo" height="60">
+                <div>
+                    <h1 class="company-name">Clover</h1>
+                    <p class="company-subtitle">Outfit Rentals</p>
+                </div>
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <div class="nav-links ms-auto">
+                    <a href="outfit.php" class="nav-link active-link">RENT OUTFITS</a>
+                    <a href="lending.php" class="nav-link">EARN THROUGH US</a>
+                    <a href="men.php" class="nav-link">MEN</a>
+                    <a href="bridal.php" class="nav-link">BRIDAL</a>
+                    <a href="ls.php?showModal=true" class="nav-link">SIGN UP</a>
+                    
+                    <div class="nav-icons">
+                        <a href="cart.php" class="icon-link">
+                            <i class="bi bi-bag"></i>
+                        </a>
+                        <a href="profile.php" class="icon-link">
+                            <i class="bi bi-person"></i>
+                        </a>
+                        <a href="index.php" class="icon-link">
+                            <i class="bi bi-house"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
     <div class="container-fluid">
         <div class="row product-details-container">
+            <!-- Add to Cart Button -->
+            
+
             <!-- Image Gallery Section -->
             <div class="col-md-6">
                 <div class="image-gallery">
@@ -81,10 +125,12 @@ $outfit_images = $images_result->fetch_all(MYSQLI_ASSOC);
                 <div class="product-info">
                     <h2 class="product-title"><?php echo htmlspecialchars($outfit['description_text']); ?></h2>
                     <p class="product-price">₹<?php echo number_format($rental_price, 2); ?></p>
-                    
+                    <button class="btn btn-dark" id="addToCartBtn" style="width: 50%; margin-bottom: 20px;">
+                <i class="bi bi-cart-plus"></i> Add to Cart
+                 </button>
                     <!-- Size Chart Icon -->
                     <div class="size-chart">
-                        <i class="fas fa-ruler" onclick="showSizeChart()"></i>
+                        <i class="fas fa-ruler"></i>
                         <span>Size Chart</span>
                     </div>
 
@@ -127,7 +173,7 @@ $outfit_images = $images_result->fetch_all(MYSQLI_ASSOC);
 
                     <!-- Rental Duration -->
                     <div class="rental-duration">
-                        <h4>Rental Duration</h4>
+                        <h4><i class="bi bi-calendar3"></i> Rental Duration</h4>
                         <div class="duration-options">
                             <input type="radio" id="3days" name="duration" value="3" checked>
                             <label for="3days">3 Days</label>
@@ -142,7 +188,7 @@ $outfit_images = $images_result->fetch_all(MYSQLI_ASSOC);
 
                     <!-- Date Selection -->
                     <div class="date-selection">
-                        <h4>Select Event Date</h4>
+                        <h4><i class="bi bi-calendar-event"></i> Select Event Date</h4>
                         <input type="text" id="eventDate" class="form-control datepicker">
                         
                         <div class="rental-dates">
@@ -158,7 +204,9 @@ $outfit_images = $images_result->fetch_all(MYSQLI_ASSOC);
                     </div>
 
                     <!-- Submit Button -->
-                    <button class="submit-btn">Proceed to Checkout</button>
+                    <button class="submit-btn">
+                        <i class="bi bi-cart-plus"></i> Proceed to Checkout
+                    </button>
                 </div>
             </div>
         </div>
@@ -166,5 +214,31 @@ $outfit_images = $images_result->fetch_all(MYSQLI_ASSOC);
 
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="rentnow.js"></script>
+    <script>
+    document.getElementById('addToCartBtn').addEventListener('click', function() {
+        const outfitId = <?php echo $outfit_id; ?>; // Get the outfit ID from PHP
+        const userId = <?php echo $_SESSION['id']; ?>; // Get the user ID from session
+
+        // Make an AJAX request to add the item to the cart
+        fetch('add_to_cart.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ outfitId: outfitId, userId: userId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Item added to cart successfully!');
+            } else {
+                alert('Error adding item to cart: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    });
+    </script>
 </body>
 </html>

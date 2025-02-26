@@ -1,5 +1,12 @@
 <?php 
 session_start();
+
+// Check if user is logged in
+if (!isset($_SESSION['loggedin'])) {
+    header("Location: ls.php");
+    exit();
+}
+
 include 'connect.php';  // Make sure this path is correct
 ?>
 <!DOCTYPE html>
@@ -13,40 +20,44 @@ include 'connect.php';  // Make sure this path is correct
     <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="style2.css">
+  <link rel="stylesheet" href="styles/navbar.css">
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </head>
 <body>
-  <nav class="navbar navbar-expand-lg navbar-light bg-white">
+  <nav class="navbar navbar-expand-lg main-navbar">
     <div class="container">
-    <a class="navbar-brand" href="#">
-      <img src="C:\Users\HP\Downloads\Frame 2.png" alt="" class="clover-logo">
-      <p class="clover-logo-text"> Clover <br> Outfit Rentals</p>
-    </a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-      <div class="navbar-nav ml-auto align-items-center">
-        <a class="nav-link active " id="navItem1" href="outfit.html">RENT OUTFITS <span class="sr-only"></span></a>
-        <a class="nav-link" id="navItem2"  href="lending.php">EARN THROUGH US</a>
-        <a class="nav-link" id="navItem3"  href="outfit.html">BRIDAL</a>
-        <a class="nav-link" id="navItem4" href="ls.php?showModal=true">SIGN UP</a>
-
-
-
-
-        <a class="nav-link" id="navItemIcon1"  href="#"><i class=" bi bi-bag-dash-fill icon-large"></i></a>
-        <a class="nav-link" id="navItemIcon2"  href="#"><i class="bi bi-person-circle icon-large"></i></a>
-        <a class="nav-link" id="navItemIcon2"  href="#"><i class="fa-solid fa-house"></i></a>
-
-        
-
-
-       
+      <a class="navbar-brand" href="index.php">
+        <img src="images/logo.png" alt="Clover Logo" height="60">
+        <div>
+          <h1 class="company-name">Clover</h1>
+          <p class="company-subtitle">Outfit Rentals</p>
+        </div>
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarContent">
+        <div class="nav-links ms-auto">
+          <a href="outfit.php" class="nav-link active-link">RENT OUTFITS</a>
+          <a href="lending.php" class="nav-link">EARN THROUGH US</a>
+          <a href="men.php" class="nav-link">MEN</a>
+          <a href="bridal.php" class="nav-link">BRIDAL</a>
+          <a href="ls.php?showModal=true" class="nav-link">SIGN UP</a>
+          <div class="nav-icons">
+            <a href="cart.php" class="icon-link">
+              <i class="bi bi-bag"></i>
+            </a>
+            <a href="profile.php" class="icon-link">
+              <i class="bi bi-person"></i>
+            </a>
+            <a href="index.php" class="icon-link">
+              <i class="bi bi-house"></i>
+            </a>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
   </nav>
   <div class="container-fluid">
     <div class="row">

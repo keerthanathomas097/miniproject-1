@@ -1,5 +1,12 @@
 <?php
 session_start();
+
+// Simply check if logged in (no redirect)
+$logged_in = isset($_SESSION['loggedin']) && $_SESSION['loggedin'];
+
+// Only set these variables if user is logged in
+$username = $logged_in ? $_SESSION['username'] : '';
+$user_role = $logged_in ? $_SESSION['role'] : '';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -43,7 +50,10 @@ session_start();
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"
     />
-
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles/navbar.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <title>Miniproject Landing page</title>
 
     <style>
@@ -145,51 +155,47 @@ session_start();
     </svg>
 
     <div class="main-body">
-      <nav class="navbar navbar-expand-lg navbar-light bg-white">
+      <nav class="navbar navbar-expand-lg main-navbar">
         <div class="container">
-          <a class="navbar-brand" href="#">
-            <img
-              src="C:\Users\HP\Downloads\Frame 2.png"
-              alt=""
-              class="clover-logo"
-            />
-            <p class="clover-logo-text"></p>
+          <a class="navbar-brand" href="index.php">
+            <img src="images/logo.png" alt="Clover Logo" height="60">
+            <div>
+              <h1 class="company-name">Clover</h1>
+              <p class="company-subtitle">Outfit Rentals</p>
+            </div>
           </a>
-          <button
-            class="navbar-toggler"
-            type="button"
-            data-toggle="collapse"
-            data-target="#navbarNavAltMarkup"
-            aria-controls="navbarNavAltMarkup"
-            aria-expanded="false"
-            aria-label="Toggle navigation"
-          >
+
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
             <span class="navbar-toggler-icon"></span>
           </button>
-          <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-            <div class="navbar-nav ml-auto align-items-center">
-              <a class="nav-link active" id="navItem1" href="outfit.html"
-                >RENT OUTFITS <span class="sr-only">(current)</span></a
-              >
-              <a class="nav-link" id="navItem2" href="lending.php"
-                >EARN THROUGH US</a
-              >
-              <a class="nav-link" id="navItem3" href="outfit.html">MEN</a>
-              <?php if(isset($_SESSION['loggedin']) && $_SESSION['loggedin']): ?>
-                <a class="nav-link" id="navItem4" href="#">Welcome, <?php echo htmlspecialchars($_SESSION['username']); ?></a>
-                <a class="nav-link" href="logout.php">LOGOUT</a>
-              <?php else: ?>
-                <a class="nav-link" id="navItem4" href="ls.php?showModal=true"
-                  >SIGN UP</a
-                >
-              <?php endif; ?>
 
-              <a class="nav-link" id="navItemIcon1" href="#"
-                ><i class="bi bi-bag-dash-fill icon-large"></i
-              ></a>
-              <a class="nav-link" id="navItemIcon2" href="#"
-                ><i class="bi bi-person-circle icon-large"></i
-              ></a>
+          <div class="collapse navbar-collapse" id="navbarContent">
+            <div class="nav-links ms-auto">
+              <a href="outfit.php" class="nav-link">RENT OUTFITS</a>
+              <a href="lending.php" class="nav-link">EARN THROUGH US</a>
+              <a href="men.php" class="nav-link">MEN</a>
+              <a href="bridal.php" class="nav-link">BRIDAL</a>
+              <a href="ls.php?showModal=true" class="nav-link">SIGN UP</a>
+              
+              <?php if(isset($_SESSION['loggedin']) && $_SESSION['loggedin']): ?>
+                <span class="nav-link"><?php echo htmlspecialchars($_SESSION['username']); ?></span>
+                <div class="nav-icons">
+                  <a href="cart.php" class="icon-link">
+                    <i class="bi bi-bag"></i>
+                  </a>
+                  <div class="dropdown">
+                    <a class="icon-link" id="profileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                      <i class="bi bi-person"></i>
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="profileDropdown">
+                      <li><a class="dropdown-item" href="profile.php">Profile</a></li>
+                      <li><a class="dropdown-item" href="logout.php">Logout</a></li>
+                    </ul>
+                  </div>
+                </div>
+              <?php else: ?>
+                <a href="ls.php?showModal=true" class="nav-link">LOGIN</a>
+              <?php endif; ?>
             </div>
           </div>
         </div>
@@ -449,6 +455,9 @@ session_start();
       </footer>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+
     <script>
       // Initialize Swiper
       const swiper = new Swiper(".swiper", {

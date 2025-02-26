@@ -1,3 +1,49 @@
+<?php
+session_start();
+include 'connect.php';
+
+// Check if user is logged in and is a lender
+if (!isset($_SESSION['loggedin']) || $_SESSION['role'] !== 'lender') {
+    header("Location: ls.php");
+    exit();
+}
+
+// Access lender information
+$lender_id = $_SESSION['id'];
+$lender_name = $_SESSION['username'];
+
+// Fetch outfits for this lender
+$query = "SELECT o.*, d.description_text, 
+          s1.subcategory_name as type_name,
+          s2.subcategory_name as size_name,
+          s3.subcategory_name as brand_name
+          FROM tbl_outfit o
+          LEFT JOIN tbl_description d ON o.description_id = d.id
+          LEFT JOIN tbl_subcategory s1 ON o.type_id = s1.id
+          LEFT JOIN tbl_subcategory s2 ON o.size_id = s2.id
+          LEFT JOIN tbl_subcategory s3 ON o.brand_id = s3.id
+          WHERE o.user_id = ?
+          ORDER BY o.created_at DESC";
+
+$stmt = $conn->prepare($query);
+$stmt->bind_param("i", $lender_id);
+$stmt->execute();
+$result = $stmt->get_result();
+
+// Get statistics
+$stats_query = "SELECT 
+    COUNT(*) as total_outfits,
+    SUM(CASE WHEN status = 'approved' THEN 1 ELSE 0 END) as approved_outfits,
+    SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending_outfits
+    FROM tbl_outfit 
+    WHERE user_id = ?";
+
+$stats_stmt = $conn->prepare($stats_query);
+$stats_stmt->bind_param("i", $lender_id);
+$stats_stmt->execute();
+$stats = $stats_stmt->get_result()->fetch_assoc();
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,9 +60,9 @@
         }
 
         :root {
-            --primary: #2c3e50;
-            --secondary: #34495e;
-            --accent: #3498db;
+            --primary: rgb(91, 9, 9);
+            --secondary:rgb(147, 42, 42);
+            --accent:rgb(217, 177, 153);
             --light: #ecf0f1;
             --success: #27ae60;
             --warning: #f1c40f;
@@ -36,6 +82,7 @@
             background-color: var(--primary);
             color: white;
             padding: 20px;
+            overflow-y: auto;
         }
 
         .sidebar-header {
@@ -160,6 +207,42 @@
             background-color: var(--warning);
             color: var(--primary);
         }
+
+        .outfits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .outfit-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .outfit-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .outfit-details {
+            padding: 15px;
+        }
+
+        .outfit-status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+
+        .status-pending { background-color: var(--warning); color: #000; }
+        .status-approved { background-color: var(--success); color: white; }
+        .status-rejected { background-color: var(--danger); color: white; }
     </style>
 </head>
 <body>
@@ -184,9 +267,9 @@
             <div class="menu-item">
                 <i class="fas fa-money-bill-wave"></i> Earnings
             </div>
-            <div class="menu-item">
-                <i class="fas fa-user"></i> Profile
-            </div>
+            <a href="lender_profile.php" class="menu-item" style="text-decoration: none; color: white;">
+                <i class="fas fa-user"></i> Profile 
+            </a>
             <div class="menu-item">
                 <i class="fas fa-cog"></i> Settings
             </div>
@@ -195,51 +278,45 @@
 
     <div class="main-content">
         <div class="header">
-            <h1>Welcome back, [Lender Name]!</h1>
+            <h1>Welcome back, <?php echo htmlspecialchars($lender_name); ?>!</h1>
             <p>Here's your outfit lending overview</p>
         </div>
 
         <div class="stats-container">
             <div class="stat-card">
-                <h3>Active Listings</h3>
-                <div class="value">24</div>
+                <h3>Total Outfits</h3>
+                <div class="value"><?php echo $stats['total_outfits']; ?></div>
             </div>
             <div class="stat-card">
-                <h3>Current Rentals</h3>
-                <div class="value">8</div>
+                <h3>Approved Outfits</h3>
+                <div class="value"><?php echo $stats['approved_outfits']; ?></div>
             </div>
             <div class="stat-card">
-                <h3>Total Earnings</h3>
-                <div class="value">$2,450</div>
-            </div>
-            <div class="stat-card">
-                <h3>Rating</h3>
-                <div class="value">4.8 ⭐</div>
+                <h3>Pending Approval</h3>
+                <div class="value"><?php echo $stats['pending_outfits']; ?></div>
             </div>
         </div>
 
         <div class="recent-activities">
-            <h2>Recent Activities</h2>
-            <div class="activity-item">
-                <div>
-                    <h4>Blue Cocktail Dress</h4>
-                    <p>Rented by Sarah M.</p>
-                </div>
-                <span class="status status-active">Active</span>
-            </div>
-            <div class="activity-item">
-                <div>
-                    <h4>Designer Suit</h4>
-                    <p>Return pending from John D.</p>
-                </div>
-                <span class="status status-pending">Pending</span>
-            </div>
-            <div class="activity-item">
-                <div>
-                    <h4>Evening Gown</h4>
-                    <p>New rental request from Emma W.</p>
-                </div>
-                <button class="btn btn-primary">Review Request</button>
+            <h2>Your Published Outfits</h2>
+            <div class="outfits-grid">
+                <?php while ($outfit = $result->fetch_assoc()): ?>
+                    <div class="outfit-card">
+                        <img src="uploads/<?php echo htmlspecialchars($outfit['image1']); ?>" 
+                             alt="Outfit Image" 
+                             class="outfit-image">
+                        <div class="outfit-details">
+                            <h4><?php echo htmlspecialchars($outfit['description_text']); ?></h4>
+                            <p>Type: <?php echo htmlspecialchars($outfit['type_name']); ?></p>
+                            <p>Size: <?php echo htmlspecialchars($outfit['size_name']); ?></p>
+                            <p>Brand: <?php echo htmlspecialchars($outfit['brand_name']); ?></p>
+                            <p>MRP: ₹<?php echo htmlspecialchars($outfit['mrp']); ?></p>
+                            <span class="outfit-status status-<?php echo strtolower($outfit['status']); ?>">
+                                <?php echo ucfirst(htmlspecialchars($outfit['status'])); ?>
+                            </span>
+                        </div>
+                    </div>
+                <?php endwhile; ?>
             </div>
         </div>
     </div>

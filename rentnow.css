@@ -187,3 +187,13 @@ h4 {
         margin: 30px 20px;
     }
 }
+
+.btn-dark {
+    background-color: #800020; /* Dark red color */
+    border-color: #800020; /* Match border color */
+}
+
+.btn-dark:hover {
+    background-color: #600018; /* Darker shade on hover */
+    border-color: #600018; /* Match border color on hover */
+}

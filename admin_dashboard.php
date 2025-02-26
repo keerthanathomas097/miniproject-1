@@ -2,6 +2,16 @@
 session_start();
 include 'connect.php';
 
+// Check if user is logged in and is an admin
+if (!isset($_SESSION['loggedin']) || $_SESSION['role'] !== 'admin') {
+    header("Location: ls.php");
+    exit();
+}
+
+// Now you can safely use session variables
+$admin_id = $_SESSION['id'];
+$admin_name = $_SESSION['username'];
+
 // Fetch total user count
 $sql = "SELECT COUNT(*) AS user_count FROM tbl_users"; 
 $result = $conn->query($sql);
@@ -727,7 +737,7 @@ $result = $conn->query($query);
         <h4 class="text-center mb-4">Fashion Rental</h4>
         <nav>
             <a href="#" class="sidebar-link"><i class="fas fa-home me-2"></i> Dashboard</a>
-            <a href="#" class="sidebar-link"><i class="fas fa-users me-2"></i> User Management</a>
+            <a href="user_management.php" class="sidebar-link"><i class="fas fa-users me-2"></i> User Management</a>
             <a href="outfit_management.php" class="sidebar-link"><i class="fas fa-tshirt me-2"></i> Outfit Management</a>
             <a href="#" class="sidebar-link"><i class="fas fa-shopping-cart me-2"></i> Orders</a>
         </nav>
