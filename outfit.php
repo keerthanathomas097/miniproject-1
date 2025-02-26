@@ -8,6 +8,10 @@ if (!isset($_SESSION['loggedin'])) {
 }
 
 include 'connect.php';  // Make sure this path is correct
+
+// Get filters from URL
+$occasion_filter = isset($_GET['occasion']) ? $_GET['occasion'] : null;
+$gender_filter = isset($_GET['gender']) ? $_GET['gender'] : null;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -41,8 +45,8 @@ include 'connect.php';  // Make sure this path is correct
         <div class="nav-links ms-auto">
           <a href="outfit.php" class="nav-link active-link">RENT OUTFITS</a>
           <a href="lending.php" class="nav-link">EARN THROUGH US</a>
-          <a href="men.php" class="nav-link">MEN</a>
-          <a href="bridal.php" class="nav-link">BRIDAL</a>
+          <a href="outfit.php?gender=male" class="nav-link">MEN</a>
+          <a href="outfit.php?occasion=wedding" class="nav-link">BRIDAL</a>
           <a href="ls.php?showModal=true" class="nav-link">SIGN UP</a>
           <div class="nav-icons">
             <a href="cart.php" class="icon-link">
@@ -130,14 +134,45 @@ include 'connect.php';  // Make sure this path is correct
           <?php
           // Fetch published outfits with their descriptions
           
-          
-          $query = "SELECT o.*, d.description_text, s.subcategory_name as brand_name 
+          // Modify the main query to handle both occasion and gender filters
+          $query = "SELECT DISTINCT o.*, d.description_text, s.subcategory_name as brand_name 
                     FROM tbl_outfit o
                     LEFT JOIN tbl_description d ON o.description_id = d.id
-                    LEFT JOIN tbl_subcategory s ON o.brand_id = s.id
-                    WHERE o.description_id IS NOT NULL";
-                    
-          $result = mysqli_query($conn, $query);
+                    LEFT JOIN tbl_subcategory s ON o.brand_id = s.id";
+
+          // Add conditions based on filters
+          $conditions = ["o.description_id IS NOT NULL", "o.status = 'approved'"];
+          $params = [];
+          $types = "";
+
+          if ($occasion_filter) {
+              $query .= " LEFT JOIN tbl_outfit_occasion oo ON o.outfit_id = oo.outfit_id
+                          LEFT JOIN tbl_subcategory occ ON oo.occasion_id = occ.id";
+              $conditions[] = "occ.subcategory_name = ?";
+              $params[] = $occasion_filter;
+              $types .= "s";
+          }
+
+          if ($gender_filter) {
+              $query .= " LEFT JOIN tbl_subcategory gen ON o.gender_id = gen.id";
+              $conditions[] = "LOWER(gen.subcategory_name) = ?";
+              $params[] = strtolower($gender_filter);
+              $types .= "s";
+          }
+
+          if (!empty($conditions)) {
+              $query .= " WHERE " . implode(" AND ", $conditions);
+          }
+
+          // Execute query with parameters if any exist
+          if (!empty($params)) {
+              $stmt = $conn->prepare($query);
+              $stmt->bind_param($types, ...$params);
+              $stmt->execute();
+              $result = $stmt->get_result();
+          } else {
+              $result = mysqli_query($conn, $query);
+          }
           
           if($result->num_rows > 0) {
               while($outfit = mysqli_fetch_assoc($result)) {

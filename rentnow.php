@@ -72,8 +72,8 @@ $outfit_images = $images_result->fetch_all(MYSQLI_ASSOC);
                 <div class="nav-links ms-auto">
                     <a href="outfit.php" class="nav-link active-link">RENT OUTFITS</a>
                     <a href="lending.php" class="nav-link">EARN THROUGH US</a>
-                    <a href="men.php" class="nav-link">MEN</a>
-                    <a href="bridal.php" class="nav-link">BRIDAL</a>
+                    <a href="outfit.php?gender=male" class="nav-link">MEN</a>
+                    <a href="outfit.php?occasion=wedding" class="nav-link">BRIDAL</a>
                     <a href="ls.php?showModal=true" class="nav-link">SIGN UP</a>
                     
                     <div class="nav-icons">

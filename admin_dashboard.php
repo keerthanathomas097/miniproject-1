@@ -740,6 +740,9 @@ $result = $conn->query($query);
             <a href="user_management.php" class="sidebar-link"><i class="fas fa-users me-2"></i> User Management</a>
             <a href="outfit_management.php" class="sidebar-link"><i class="fas fa-tshirt me-2"></i> Outfit Management</a>
             <a href="#" class="sidebar-link"><i class="fas fa-shopping-cart me-2"></i> Orders</a>
+            <a href="admin_profile.php" class="sidebar-link">
+                <i class="fas fa-user"></i> Profile 
+            </a>
         </nav>
     </div>
 
