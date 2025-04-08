@@ -1,7 +1,7 @@
 <?php
 include 'connect.php';
 
-$database_name = "miniproject";
+$database_name = "minipro";
 $sql = "CREATE DATABASE $database_name";
 
 if (mysqli_query($conn, $sql)) {

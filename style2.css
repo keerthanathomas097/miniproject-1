@@ -358,3 +358,16 @@ body {
 .rental-thumbnail.active {
     border-color: #8d2626;
 } */
+.user-name {
+  color: #800020 !important;
+  font-weight: 500;
+  padding: 8px 15px;
+  margin-right: 10px;
+  border-radius: 4px;
+  background-color: rgba(128, 0, 32, 0.1);
+}
+
+.nav-link.user-name:hover {
+  background-color: rgba(128, 0, 32, 0.15);
+  cursor: default;
+}

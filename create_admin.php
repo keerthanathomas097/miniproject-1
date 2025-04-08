@@ -5,7 +5,7 @@ include 'connect.php';
 $admin_name = "Anna Thomas";
 $admin_email = "keerthanathomas9697@gmail.com";
 $admin_password = "adminpassword"; // Change this to a more secure password
-$admin_phone = "8075643884";
+$admin_phone = "8075643889";
 $admin_role = "admin";
 
 // Hash the password

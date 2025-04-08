@@ -1,0 +1,563 @@
+=== New Order Request 2025-03-24 04:13:31 ===
+POST data: Array
+(
+    [outfit_id] => 14
+    [amount] => 9028
+    [payment_method] => credit_card
+)
+
+SESSION data: Array
+(
+    [loggedin] => 1
+    [id] => 1
+    [username] => keerthanaUser
+    [role] => user
+)
+
+Processed data: user_id=1, outfit_id=14, amount=9028
+SQL Query: INSERT INTO tbl_orders (user_id, outfit_id, order_reference, amount, 
+         payment_method, order_status, payment_status, created_at, updated_at) 
+        VALUES (1, 14, 'DIR-27F18D46', 9028, 
+         'credit_card', 'PENDING', 'PENDING', '2025-03-24 04:13:31', '2025-03-24 04:13:31')
+SUCCESS! Order inserted with ID: 9
+=== New Order Request 2025-03-24 04:31:46 ===
+POST data: Array
+(
+    [outfit_id] => 15
+    [amount] => 11099
+    [payment_method] => credit_card
+)
+
+SESSION data: Array
+(
+    [loggedin] => 1
+    [id] => 1
+    [username] => keerthanaUser
+    [role] => user
+)
+
+Processed data: user_id=1, outfit_id=15, amount=11099
+SQL Query: INSERT INTO tbl_orders (user_id, outfit_id, order_reference, amount, 
+         payment_method, order_status, payment_status, created_at, updated_at) 
+        VALUES (1, 15, 'DIR-898F9E9D', 11099, 
+         'credit_card', 'PENDING', 'PENDING', '2025-03-24 04:31:46', '2025-03-24 04:31:46')
+SUCCESS! Order inserted with ID: 10
+=== New Order Request 2025-03-24 04:55:15 ===
+POST data: Array
+(
+    [outfit_id] => 16
+    [amount] => 13279
+    [payment_method] => credit_card
+    [rental_rate] => 6000
+    [security_deposit] => 6000
+)
+
+SESSION data: Array
+(
+    [loggedin] => 1
+    [id] => 1
+    [username] => keerthanaUser
+    [role] => user
+)
+
+Processed data: user_id=1, outfit_id=16, amount=13279, rental_rate=6000, security_deposit=6000
+SQL Query: INSERT INTO tbl_orders (
+            user_id, outfit_id, order_reference, amount, 
+            rental_rate, security_deposit,
+            payment_method, order_status, payment_status, 
+            created_at, updated_at
+        ) VALUES (
+            1, 16, 'ORD-920865D8', 13279, 
+            6000, 6000,
+            'credit_card', 'CONFIRMED', 'PAID', 
+            '2025-03-24 04:55:15', '2025-03-24 04:55:15'
+        )
+SUCCESS! Order inserted with ID: 11
+=== New Order Request 2025-03-24 04:55:16 ===
+POST data: Array
+(
+    [outfit_id] => 16
+    [amount] => 13279
+    [payment_method] => credit_card
+)
+
+SESSION data: Array
+(
+    [loggedin] => 1
+    [id] => 1
+    [username] => keerthanaUser
+    [role] => user
+    [current_order_id] => 11
+    [temp_outfit_id] => 16
+    [temp_amount] => 13279
+)
+
+Processed data: user_id=1, outfit_id=16, amount=13279, rental_rate=6000, security_deposit=6000
+SQL Query: INSERT INTO tbl_orders (
+            user_id, outfit_id, order_reference, amount, 
+            rental_rate, security_deposit,
+            payment_method, order_status, payment_status, 
+            created_at, updated_at
+        ) VALUES (
+            1, 16, 'ORD-5A98D5B5', 13279, 
+            6000, 6000,
+            'credit_card', 'CONFIRMED', 'PAID', 
+            '2025-03-24 04:55:16', '2025-03-24 04:55:16'
+        )
+SUCCESS! Order inserted with ID: 12
+=== New Order Request 2025-03-27 07:03:20 ===
+POST data: Array
+(
+    [outfit_id] => 17
+    [amount] => 15459
+    [payment_method] => credit_card
+)
+
+SESSION data: Array
+(
+    [loggedin] => 1
+    [id] => 1
+    [username] => keerthanaUser
+    [role] => user
+)
+
+Processed data: user_id=1, outfit_id=17, amount=15459, rental_rate=7000, security_deposit=7000
+SQL Query: INSERT INTO tbl_orders (
+            user_id, outfit_id, order_reference, amount, 
+            rental_rate, security_deposit,
+            payment_method, order_status, payment_status, 
+            created_at, updated_at
+        ) VALUES (
+            1, 17, 'ORD-5D9A3481', 15459, 
+            7000, 7000,
+            'credit_card', 'CONFIRMED', 'PAID', 
+            '2025-03-27 07:03:21', '2025-03-27 07:03:21'
+        )
+SUCCESS! Order inserted with ID: 13
+=== New Order Request 2025-03-27 07:03:25 ===
+POST data: Array
+(
+    [outfit_id] => 17
+    [amount] => 15459
+    [payment_method] => credit_card
+    [rental_rate] => 7000
+    [security_deposit] => 7000
+)
+
+SESSION data: Array
+(
+    [loggedin] => 1
+    [id] => 1
+    [username] => keerthanaUser
+    [role] => user
+    [current_order_id] => 13
+    [temp_outfit_id] => 17
+    [temp_amount] => 15459
+)
+
+Processed data: user_id=1, outfit_id=17, amount=15459, rental_rate=7000, security_deposit=7000
+SQL Query: INSERT INTO tbl_orders (
+            user_id, outfit_id, order_reference, amount, 
+            rental_rate, security_deposit,
+            payment_method, order_status, payment_status, 
+            created_at, updated_at
+        ) VALUES (
+            1, 17, 'ORD-11C0DD04', 15459, 
+            7000, 7000,
+            'credit_card', 'CONFIRMED', 'PAID', 
+            '2025-03-27 07:03:25', '2025-03-27 07:03:25'
+        )
+SUCCESS! Order inserted with ID: 14
+=== New Order Request 2025-03-28 03:59:30 ===
+POST data: Array
+(
+    [outfit_id] => 18
+    [amount] => 15459
+    [payment_method] => credit_card
+    [rental_rate] => 7000
+    [security_deposit] => 7000
+)
+
+SESSION data: Array
+(
+    [loggedin] => 1
+    [id] => 3
+    [username] => keerthanacollege
+    [role] => lender
+    [show_welcome] => 1
+)
+
+Processed data: user_id=3, outfit_id=18, amount=15459, rental_rate=7000, security_deposit=7000
+SQL Query: INSERT INTO tbl_orders (
+            user_id, outfit_id, order_reference, amount, 
+            rental_rate, security_deposit,
+            payment_method, order_status, payment_status, 
+            created_at, updated_at
+        ) VALUES (
+            3, 18, 'ORD-C9B6ED1B', 15459, 
+            7000, 7000,
+            'credit_card', 'CONFIRMED', 'PAID', 
+            '2025-03-28 03:59:30', '2025-03-28 03:59:30'
+        )
+SUCCESS! Order inserted with ID: 15
+=== New Order Request 2025-03-28 03:59:30 ===
+POST data: Array
+(
+    [outfit_id] => 18
+    [amount] => 15459
+    [payment_method] => credit_card
+)
+
+SESSION data: Array
+(
+    [loggedin] => 1
+    [id] => 3
+    [username] => keerthanacollege
+    [role] => lender
+    [show_welcome] => 1
+    [current_order_id] => 15
+    [temp_outfit_id] => 18
+    [temp_amount] => 15459
+)
+
+Processed data: user_id=3, outfit_id=18, amount=15459, rental_rate=7000, security_deposit=7000
+SQL Query: INSERT INTO tbl_orders (
+            user_id, outfit_id, order_reference, amount, 
+            rental_rate, security_deposit,
+            payment_method, order_status, payment_status, 
+            created_at, updated_at
+        ) VALUES (
+            3, 18, 'ORD-4196A4AF', 15459, 
+            7000, 7000,
+            'credit_card', 'CONFIRMED', 'PAID', 
+            '2025-03-28 03:59:30', '2025-03-28 03:59:30'
+        )
+ERROR: Database error: Duplicate entry '3-18-2025-03-28 03:59:30' for key 'prevent_duplicate_orders'
+=== New Order Request 2025-03-31 01:27:42 ===
+POST data: Array
+(
+    [outfit_id] => 15
+    [amount] => 11099
+    [payment_method] => credit_card
+    [rental_rate] => 5000
+    [security_deposit] => 5000
+)
+
+SESSION data: Array
+(
+    [loggedin] => 1
+    [id] => 1
+    [username] => keerthanaUser
+    [role] => user
+)
+
+Processed data: user_id=1, outfit_id=15, amount=11099, rental_rate=5000, security_deposit=5000
+SQL Query: INSERT INTO tbl_orders (
+            user_id, outfit_id, order_reference, amount, 
+            rental_rate, security_deposit,
+            payment_method, order_status, payment_status, 
+            created_at, updated_at
+        ) VALUES (
+            1, 15, 'ORD-7DA53A47', 11099, 
+            5000, 5000,
+            'credit_card', 'CONFIRMED', 'PAID', 
+            '2025-03-31 01:27:42', '2025-03-31 01:27:42'
+        )
+SUCCESS! Order inserted with ID: 17
+=== New Order Request 2025-03-31 01:27:42 ===
+POST data: Array
+(
+    [outfit_id] => 15
+    [amount] => 11099
+    [payment_method] => credit_card
+)
+
+SESSION data: Array
+(
+    [loggedin] => 1
+    [id] => 1
+    [username] => keerthanaUser
+    [role] => user
+    [current_order_id] => 17
+    [temp_outfit_id] => 15
+    [temp_amount] => 11099
+)
+
+Processed data: user_id=1, outfit_id=15, amount=11099, rental_rate=5000, security_deposit=5000
+SQL Query: INSERT INTO tbl_orders (
+            user_id, outfit_id, order_reference, amount, 
+            rental_rate, security_deposit,
+            payment_method, order_status, payment_status, 
+            created_at, updated_at
+        ) VALUES (
+            1, 15, 'ORD-38DFC873', 11099, 
+            5000, 5000,
+            'credit_card', 'CONFIRMED', 'PAID', 
+            '2025-03-31 01:27:42', '2025-03-31 01:27:42'
+        )
+ERROR: Database error: Duplicate entry '1-15-2025-03-31 01:27:42' for key 'prevent_duplicate_orders'
+=== New Order Request 2025-03-31 01:29:07 ===
+POST data: Array
+(
+    [outfit_id] => 15
+    [amount] => 11099
+    [payment_method] => credit_card
+    [rental_rate] => 5000
+    [security_deposit] => 5000
+)
+
+SESSION data: Array
+(
+    [loggedin] => 1
+    [id] => 1
+    [username] => keerthanaUser
+    [role] => user
+    [current_order_id] => 17
+    [temp_outfit_id] => 15
+    [temp_amount] => 11099
+)
+
+Processed data: user_id=1, outfit_id=15, amount=11099, rental_rate=5000, security_deposit=5000
+SQL Query: INSERT INTO tbl_orders (
+            user_id, outfit_id, order_reference, amount, 
+            rental_rate, security_deposit,
+            payment_method, order_status, payment_status, 
+            created_at, updated_at
+        ) VALUES (
+            1, 15, 'ORD-C532D109', 11099, 
+            5000, 5000,
+            'credit_card', 'CONFIRMED', 'PAID', 
+            '2025-03-31 01:29:07', '2025-03-31 01:29:07'
+        )
+SUCCESS! Order inserted with ID: 19
+=== New Order Request 2025-03-31 01:29:09 ===
+POST data: Array
+(
+    [outfit_id] => 15
+    [amount] => 11099
+    [payment_method] => credit_card
+)
+
+SESSION data: Array
+(
+    [loggedin] => 1
+    [id] => 1
+    [username] => keerthanaUser
+    [role] => user
+    [current_order_id] => 19
+    [temp_outfit_id] => 15
+    [temp_amount] => 11099
+)
+
+Processed data: user_id=1, outfit_id=15, amount=11099, rental_rate=5000, security_deposit=5000
+SQL Query: INSERT INTO tbl_orders (
+            user_id, outfit_id, order_reference, amount, 
+            rental_rate, security_deposit,
+            payment_method, order_status, payment_status, 
+            created_at, updated_at
+        ) VALUES (
+            1, 15, 'ORD-5ACEA55D', 11099, 
+            5000, 5000,
+            'credit_card', 'CONFIRMED', 'PAID', 
+            '2025-03-31 01:29:09', '2025-03-31 01:29:09'
+        )
+SUCCESS! Order inserted with ID: 20
+=== New Order Request 2025-03-31 16:35:00 ===
+POST data: Array
+(
+    [outfit_id] => 20
+    [amount] => 13279
+    [payment_method] => credit_card
+    [rental_rate] => 6000
+    [security_deposit] => 6000
+)
+
+SESSION data: Array
+(
+    [loggedin] => 1
+    [id] => 1
+    [username] => keerthanaUser
+    [role] => user
+    [last_order_time] => 1743431687
+)
+
+Processed data: user_id=1, outfit_id=20, amount=13279, rental_rate=6000, security_deposit=6000
+SQL Query: INSERT INTO tbl_orders (
+            user_id, outfit_id, order_reference, amount, 
+            rental_rate, security_deposit,
+            payment_method, order_status, payment_status, 
+            created_at, updated_at
+        ) VALUES (
+            1, 20, 'ORD-D987C619', 13279, 
+            6000, 6000,
+            'credit_card', 'CONFIRMED', 'PAID', 
+            '2025-03-31 16:35:00', '2025-03-31 16:35:00'
+        )
+SUCCESS! Order inserted with ID: 21
+=== New Order Request 2025-03-31 16:35:04 ===
+POST data: Array
+(
+    [outfit_id] => 20
+    [amount] => 13279
+    [payment_method] => credit_card
+)
+
+SESSION data: Array
+(
+    [loggedin] => 1
+    [id] => 1
+    [username] => keerthanaUser
+    [role] => user
+    [last_order_time] => 1743431687
+    [current_order_id] => 21
+    [temp_outfit_id] => 20
+    [temp_amount] => 13279
+)
+
+Processed data: user_id=1, outfit_id=20, amount=13279, rental_rate=6000, security_deposit=6000
+SQL Query: INSERT INTO tbl_orders (
+            user_id, outfit_id, order_reference, amount, 
+            rental_rate, security_deposit,
+            payment_method, order_status, payment_status, 
+            created_at, updated_at
+        ) VALUES (
+            1, 20, 'ORD-D57534F3', 13279, 
+            6000, 6000,
+            'credit_card', 'CONFIRMED', 'PAID', 
+            '2025-03-31 16:35:04', '2025-03-31 16:35:04'
+        )
+SUCCESS! Order inserted with ID: 22
+=== New Order Request 2025-03-31 17:31:39 ===
+POST data: Array
+(
+    [outfit_id] => 21
+    [amount] => 7829
+    [payment_method] => credit_card
+    [rental_rate] => 3500
+    [security_deposit] => 3500
+)
+
+SESSION data: Array
+(
+    [loggedin] => 1
+    [id] => 1
+    [username] => keerthanaUser
+    [role] => user
+    [last_order_time] => 1743435094
+    [last_order_reference] => 
+)
+
+Processed data: user_id=1, outfit_id=21, amount=7829, rental_rate=3500, security_deposit=3500
+SQL Query: INSERT INTO tbl_orders (
+            user_id, outfit_id, order_reference, amount, 
+            rental_rate, security_deposit,
+            payment_method, order_status, payment_status, 
+            created_at, updated_at
+        ) VALUES (
+            1, 21, 'ORD-AFD85234', 7829, 
+            3500, 3500,
+            'credit_card', 'CONFIRMED', 'PAID', 
+            '2025-03-31 17:31:39', '2025-03-31 17:31:39'
+        )
+SUCCESS! Order inserted with ID: 23
+=== New Order Request 2025-03-31 17:31:39 ===
+POST data: Array
+(
+    [outfit_id] => 21
+    [amount] => 7829
+    [payment_method] => credit_card
+)
+
+SESSION data: Array
+(
+    [loggedin] => 1
+    [id] => 1
+    [username] => keerthanaUser
+    [role] => user
+    [last_order_time] => 1743435094
+    [last_order_reference] => 
+    [current_order_id] => 23
+    [temp_outfit_id] => 21
+    [temp_amount] => 7829
+)
+
+Processed data: user_id=1, outfit_id=21, amount=7829, rental_rate=3500, security_deposit=3500
+SQL Query: INSERT INTO tbl_orders (
+            user_id, outfit_id, order_reference, amount, 
+            rental_rate, security_deposit,
+            payment_method, order_status, payment_status, 
+            created_at, updated_at
+        ) VALUES (
+            1, 21, 'ORD-DEF5A9BD', 7829, 
+            3500, 3500,
+            'credit_card', 'CONFIRMED', 'PAID', 
+            '2025-03-31 17:31:39', '2025-03-31 17:31:39'
+        )
+ERROR: Database error: Duplicate entry '1-21-2025-03-31 17:31:39' for key 'prevent_duplicate_orders'
+=== New Order Request 2025-04-01 07:31:59 ===
+POST data: Array
+(
+    [outfit_id] => 22
+    [amount] => 130999
+    [payment_method] => credit_card
+    [rental_rate] => 60000
+    [security_deposit] => 60000
+)
+
+SESSION data: Array
+(
+    [loggedin] => 1
+    [id] => 4
+    [username] => ThomasPJ
+    [role] => user
+    [last_order_time] => 1743485510
+    [last_order_reference] => 
+)
+
+Processed data: user_id=4, outfit_id=22, amount=130999, rental_rate=60000, security_deposit=60000
+SQL Query: INSERT INTO tbl_orders (
+            user_id, outfit_id, order_reference, amount, 
+            rental_rate, security_deposit,
+            payment_method, order_status, payment_status, 
+            created_at, updated_at
+        ) VALUES (
+            4, 22, 'ORD-287D987F', 130999, 
+            60000, 60000,
+            'credit_card', 'CONFIRMED', 'PAID', 
+            '2025-04-01 07:31:59', '2025-04-01 07:31:59'
+        )
+SUCCESS! Order inserted with ID: 25
+=== New Order Request 2025-04-01 07:31:59 ===
+POST data: Array
+(
+    [outfit_id] => 22
+    [amount] => 130999
+    [payment_method] => credit_card
+)
+
+SESSION data: Array
+(
+    [loggedin] => 1
+    [id] => 4
+    [username] => ThomasPJ
+    [role] => user
+    [last_order_time] => 1743485510
+    [last_order_reference] => 
+    [current_order_id] => 25
+    [temp_outfit_id] => 22
+    [temp_amount] => 130999
+)
+
+Processed data: user_id=4, outfit_id=22, amount=130999, rental_rate=60000, security_deposit=60000
+SQL Query: INSERT INTO tbl_orders (
+            user_id, outfit_id, order_reference, amount, 
+            rental_rate, security_deposit,
+            payment_method, order_status, payment_status, 
+            created_at, updated_at
+        ) VALUES (
+            4, 22, 'ORD-3DED4A01', 130999, 
+            60000, 60000,
+            'credit_card', 'CONFIRMED', 'PAID', 
+            '2025-04-01 07:31:59', '2025-04-01 07:31:59'
+        )
+ERROR: Database error: Duplicate entry '4-22-2025-04-01 07:31:59' for key 'prevent_duplicate_orders'

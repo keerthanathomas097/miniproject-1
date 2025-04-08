@@ -1,0 +1,66 @@
+Order request received: 2025-03-23 10:49:15
+POST data: Array
+(
+    [outfit_id] => 12
+    [amount] => 8919
+    [payment_method] => COD
+    [user_id] => 1
+    [start_date] => 2025-03-29
+    [end_date] => 2025-04-02
+)
+
+Error: Error preparing statement: Unknown column 'start_date' in 'field list'
+Order request received: 2025-03-23 10:49:48
+POST data: Array
+(
+    [outfit_id] => 12
+    [amount] => 8919
+    [payment_method] => COD
+    [user_id] => 1
+    [start_date] => 2025-03-29
+    [end_date] => 2025-04-02
+)
+
+Error: Error preparing statement: Unknown column 'start_date' in 'field list'
+Request started at 2025-03-23 14:37:04
+POST data: Array
+(
+    [outfit_id] => 12
+    [amount] => 8919
+    [payment_method] => credit_card
+    [user_id] => 1
+    [start_date] => 2025-03-29
+    [end_date] => 2025-04-02
+)
+
+Processed data: user_id=1, outfit_id=12, amount=8919, payment_method=credit_card
+Preparing query: INSERT INTO tbl_orders (
+                user_id, outfit_id, order_reference, amount, 
+                payment_method, order_status, payment_status,
+                created_at, updated_at) 
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+Executing query
+Order created successfully with ID: 1
+Request completed at 2025-03-23 14:37:05
+
+Request started at 2025-03-23 14:37:12
+POST data: Array
+(
+    [outfit_id] => 12
+    [amount] => 8919
+    [payment_method] => credit_card
+    [user_id] => 1
+    [start_date] => 2025-03-29
+    [end_date] => 2025-04-02
+)
+
+Processed data: user_id=1, outfit_id=12, amount=8919, payment_method=credit_card
+Preparing query: INSERT INTO tbl_orders (
+                user_id, outfit_id, order_reference, amount, 
+                payment_method, order_status, payment_status,
+                created_at, updated_at) 
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+Executing query
+Order created successfully with ID: 2
+Request completed at 2025-03-23 14:37:12
+

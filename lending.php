@@ -1,6 +1,16 @@
 <?php
 session_start();
 include 'connect.php';
+$termsContent = "1. LISTING OF THE PRODUCT
+
+Preliminary approval:
+
+The Owner shall fill the form provided at http://rentanattire.com/earn-through-us. The Company will receive a request from the Owner containing the images of Product and its general information, the company will approve or reject the Product after checking the same.
+On approval of the Product, the Owner will receive an email from the company. Owner then shall, after receiving such communication from the Company have to submit the Product to the Company along with other details as may be required by the Company. The Company cannot be held liable for any damages arising to the Product while it is in transit to the Company's warehouse.
+The Owner shall not submit any Product which has not been approved by the Company. The Company shall not be liable for the loss of such Products or any damages incurred in relation thereto.
+"; 
+$userName = isset($_SESSION['username']) ? $_SESSION['username'] : '';
+$isLoggedIn = isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true;
 
 $isLender = isset($_SESSION['loggedin']) && $_SESSION['role'] === 'lender';
 
@@ -145,12 +155,18 @@ if (empty($_POST['email'])) {
 
     // Proceed only if there are no errors
     if (empty($errors)) {
-        // Get user_id based on logged in user's email
+        // Check if database connection exists and is valid
+        if (!$conn || $conn->connect_error) {
+            throw new Exception("Database connection failed: " . ($conn ? $conn->connect_error : "Connection not established"));
+        } else {
+            try {
+                // Get user_id based on email
         $email = $_POST['email'];
-        $user_id = null;
-        
-        // First fetch user_id based on the email
         $stmt = $conn->prepare("SELECT user_id FROM tbl_users WHERE email = ?");
+                if (!$stmt) {
+                    throw new Exception("Error preparing user query: " . $conn->error);
+                }
+                
         $stmt->bind_param("s", $email);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -158,47 +174,86 @@ if (empty($_POST['email'])) {
         if ($result->num_rows > 0) {
             $row = $result->fetch_assoc();
             $user_id = $row['user_id'];
-            
-            // Now proceed with outfit insertion
-            $size_id = $_POST['size_id'];
-            $type_id = $_POST['type_id'];
-            $brand_id = $_POST['brand_id'];
-            $mrp = $_POST['mrp'];
-            $purchase_year = $_POST['purchaseYear'];
-            $city = $_POST['city'];
-            $status = 'Pending';
-
-            $stmt = $conn->prepare("INSERT INTO tbl_outfit
-                                (user_id, size_id, type_id, brand_id, mrp, purchase_year, city, status, image1, image2, image3, proof_image)
-                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                    $stmt->close();
+                    
+                    // Insert outfit data with correct column names
+                    $insert_query = "INSERT INTO tbl_outfit (
+                        email,
+                        brand_id,
+                        size_id,
+                        gender_id,
+                        type_id,
+                        mrp,
+                        price_id,
+                        image1,
+                        image2,
+                        image3,
+                        status,
+                        purchase_year,
+                        city,
+                        address,
+                        proof_image
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                    
+                    $stmt = $conn->prepare($insert_query);
+                    if (!$stmt) {
+                        throw new Exception("Error preparing insert query: " . $conn->error);
+                    }
+                    
+                    $status = 'pending';
+                    $mrp = floatval($_POST['mrp']);
+                    $purchase_year = intval($_POST['purchaseYear']);
+                    
+                    // Add price_id selection based on MRP
+                    $price_id = null;
+                    if ($mrp <= 50000) {
+                        $price_id = 1; // ID for price range <= 50000
+                    } elseif ($mrp <= 100000) {
+                        $price_id = 2; // ID for price range 50001-100000
+                    } else {
+                        $price_id = 3; // ID for price range > 100000
+                    }
 
             $stmt->bind_param(
-                "iiiidissssss",  // Changed parameter types to match the data types
-                $user_id,
-                $size_id,
-                $type_id,
-                $brand_id,
+                        "siiiiidiissssss",
+                        $_POST['email'],
+                        $_POST['brand_id'],
+                        $_POST['size_id'],
+                        $_POST['gender_id'],
+                        $_POST['type_id'],
                 $mrp,
-                $purchase_year,
-                $city,
-                $status,
+                        $price_id,
                 $imagePaths[0],
                 $imagePaths[1],
                 $imagePaths[2],
+                        $status,
+                        $purchase_year,
+                        $_POST['city'],
+                        $_POST['address'],
                 $proofImagePath
             );
             
             if ($stmt->execute()) {
-                echo "Outfit listed successfully!";
+                        $success_message = "Outfit listed successfully!";
+                        $_POST = array();
             } else {
-                echo "Database error: " . $stmt->error;
+                        throw new Exception("Error inserting data: " . $stmt->error);
+                    }
+                } else {
+                    throw new Exception("No user found with this email address.");
             }
 
+            } catch (Exception $e) {
+                $errors[] = $e->getMessage();
+            } finally {
+                if (isset($stmt) && $stmt instanceof mysqli_stmt) {
             $stmt->close();
-        } else {
-            $errors[] = "No user found with this email address.";
         }
+                if (isset($conn) && $conn instanceof mysqli) {
         $conn->close();
+                }
+            }
+        }
     }
 }
 ?>
@@ -366,6 +421,19 @@ if (empty($_POST['email'])) {
             font-size: 0.95rem;
             line-height: 1.5;
         }
+        .user-name {
+    color: #800020 !important;
+    font-weight: 500;
+    padding: 8px 15px;
+    margin-right: 10px;
+    border-radius: 4px;
+    background-color: rgba(128, 0, 32, 0.1);
+}
+
+.nav-link.user-name:hover {
+    background-color: rgba(128, 0, 32, 0.15);
+    cursor: default;
+}
     </style>
 </head>
 <body>
@@ -417,25 +485,38 @@ if (empty($_POST['email'])) {
             </button>
 
             <div class="collapse navbar-collapse" id="navbarContent">
-                <div class="nav-links ms-auto">
-                    <a href="outfit.php" class="nav-link">RENT OUTFITS</a>
-                    <a href="lending.php" class="nav-link active-link">EARN THROUGH US</a>
-                    <a href="outfit.php?gender=male" class="nav-link">MEN</a>
-                    <a href="outfit.php?occasion=wedding" class="nav-link">BRIDAL</a>
-                    <a href="ls.php?showModal=true" class="nav-link">SIGN UP</a>
-                    
-                    <div class="nav-icons">
-                        <a href="cart.php" class="icon-link">
-                            <i class="bi bi-bag"></i>
-                        </a>
-                        <a href="profile.php" class="icon-link">
-                            <i class="bi bi-person"></i>
-                        </a>
-                        <a href="index.php" class="icon-link">
-                            <i class="bi bi-house"></i>
-                        </a>
-                    </div>
-                </div>
+            <div class="nav-links ms-auto">
+    <a href="outfit.php" class="nav-link active-link">RENT OUTFITS</a>
+    <a href="lending.php" class="nav-link">EARN THROUGH US</a>
+    <a href="outfit.php?gender=male" class="nav-link">MEN</a>
+    <a href="outfit.php?occasion=wedding" class="nav-link">BRIDAL</a>
+    
+    <?php if ($isLoggedIn): ?>
+        <span class="nav-link user-name">Welcome, <?php echo htmlspecialchars($userName); ?></span>
+    <?php else: ?>
+        <a href="ls.php?showModal=true" class="nav-link">SIGN UP</a>
+    <?php endif; ?>
+    
+    <div class="nav-icons">
+        <a href="cart.php" class="icon-link">
+            <i class="bi bi-bag"></i>
+        </a>
+        <?php if ($isLoggedIn): ?>
+            <div class="dropdown">
+                <a class="icon-link" id="profileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-person"></i>
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="profileDropdown">
+                    <li><a class="dropdown-item" href="profile.php">Profile</a></li>
+                    <li><a class="dropdown-item" href="logout.php">Logout</a></li>
+                </ul>
+            </div>
+        <?php endif; ?>
+        <a href="index.php" class="icon-link">
+            <i class="bi bi-house"></i>
+        </a>
+    </div>
+</div>
             </div>
         </div>
     </nav>
@@ -524,7 +605,8 @@ if (empty($_POST['email'])) {
             <select class="form-control" name="brand_id" required>
                 <option value="">Select Brand</option>
                 <?php
-                $brand_query = "SELECT s.id, s.subcategory_name FROM tbl_subcategory s 
+                $brand_query = "SELECT s.id, s.subcategory_name 
+                                FROM tbl_subcategory s 
                             JOIN tbl_category c ON s.category_id = c.id 
                             WHERE c.category_name = 'Brand'";
                 $brand_result = mysqli_query($conn, $brand_query);
@@ -544,7 +626,8 @@ if (empty($_POST['email'])) {
                 <select class="form-select" name="size_id" required>
                     <option value="">Select Size</option>
                     <?php
-                    $size_query = "SELECT s.id, s.subcategory_name FROM tbl_subcategory s 
+                    $size_query = "SELECT s.id, s.subcategory_name 
+                                   FROM tbl_subcategory s 
                                 JOIN tbl_category c ON s.category_id = c.id 
                                 WHERE c.category_name = 'Size'";
                     $size_result = mysqli_query($conn, $size_query);
@@ -555,16 +638,17 @@ if (empty($_POST['email'])) {
                 </select>
             </div>
             <div class="col-md-6">
-                <label class="form-label">Category</label>
-                <select class="form-select" name="type_id" required>
-                    <option value="">Select Category</option>
+                <label class="form-label">Gender</label>
+                <select class="form-select" name="gender_id" required>
+                    <option value="">Select Gender</option>
                     <?php
-                    $type_query = "SELECT s.id, s.subcategory_name FROM tbl_subcategory s 
+                    $gender_query = "SELECT s.id, s.subcategory_name 
+                                    FROM tbl_subcategory s 
                                 JOIN tbl_category c ON s.category_id = c.id 
-                                WHERE c.category_name = 'Type'";
-                    $type_result = mysqli_query($conn, $type_query);
-                    while($type = mysqli_fetch_assoc($type_result)) {
-                        echo "<option value='".$type['id']."'>".$type['subcategory_name']."</option>";
+                                    WHERE c.category_name = 'Gender'";
+                    $gender_result = mysqli_query($conn, $gender_query);
+                    while($gender = mysqli_fetch_assoc($gender_result)) {
+                        echo "<option value='".$gender['id']."'>".$gender['subcategory_name']."</option>";
                     }
                     ?>
                 </select>
@@ -614,11 +698,41 @@ if (empty($_POST['email'])) {
             </div>
         </div>
 
-        <div class="text-center mt-4">
-            <button type="submit" class="btn btn-submit">Submit Outfit Details</button>
+        <div class="mb-3">
+            <label class="form-label">Type</label>
+            <select class="form-select" name="type_id" required>
+                <option value="">Select Type</option>
+                <?php
+                $type_query = "SELECT s.id, s.subcategory_name 
+                               FROM tbl_subcategory s 
+                               JOIN tbl_category c ON s.category_id = c.id 
+                               WHERE c.category_name = 'Type'";
+                $type_result = mysqli_query($conn, $type_query);
+                while($type = mysqli_fetch_assoc($type_result)) {
+                    echo "<option value='".$type['id']."'>".$type['subcategory_name']."</option>";
+                }
+                ?>
+            </select>
         </div>
-    </form>
-            
+
+<div class="mb-4">
+    <div class="form-check">
+        <input class="form-check-input" type="checkbox" id="termsCheckbox" required>
+        <label class="form-check-label" for="termsCheckbox">
+            I agree to the <a href="#" class="terms-link">Terms and Conditions</a>
+        </label>
+        <div class="invalid-feedback">
+            You must agree to the terms and conditions
+        </div>
+    </div>
+</div>
+
+<div class="text-center mt-4">
+    <button type="submit" class="btn btn-submit" disabled>Submit Outfit Details</button>
+</div>
+</form>
+        
+      
             
             
         </div>
@@ -784,7 +898,7 @@ if (empty($_POST['email'])) {
             size_id: {
                 validate: (input) => input.value ? '' : 'Please select a size'
             },
-            type_id: {
+            gender_id: {
                 validate: (input) => input.value ? '' : 'Please select a category'
             },
             purchaseYear: {
@@ -916,7 +1030,7 @@ document.addEventListener('DOMContentLoaded', function() {
             required: true,
             message: 'Please select a size'
         },
-        type_id: {
+        gender_id: {
             required: true,
             message: 'Please select a category'
         },
@@ -1041,7 +1155,31 @@ document.addEventListener('DOMContentLoaded', function() {
                 firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
         }
+});
+});
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Combine all your event listeners and validation logic here
+    const form = document.getElementById('outfitForm');
+    const inputs = form.querySelectorAll('input, select, textarea');
+    const submitButton = form.querySelector('button[type="submit"]');
+    const termsLink = document.querySelector('.terms-link');
+    const termsCheckbox = document.getElementById('termsCheckbox');
+
+    // Terms and conditions handlers
+    termsLink.addEventListener('click', function(e) {
+        e.preventDefault();
+        const termsModal = new bootstrap.Modal(document.getElementById('termsModal'));
+        termsModal.show();
     });
+
+    termsCheckbox.addEventListener('change', function() {
+        checkFormValidity();
+    });
+
+    // Your existing validation code...
+    // ... rest of your validation logic ...
 });
 </script>
 
@@ -1072,7 +1210,55 @@ document.addEventListener('DOMContentLoaded', function() {
     background-position: right calc(0.375em + 0.1875rem) center;
     background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
 }
+.terms-link {
+    color: #800020;
+    text-decoration: none;
+}
+
+.terms-link:hover {
+    text-decoration: underline;
+}
+
+.terms-content {
+    line-height: 1.6;
+    color: #333;
+}
+
+.modal-dialog-scrollable {
+    max-height: 80vh;
+}
+
+.form-check-input:checked {
+    background-color: #800020;
+    border-color: #800020;
+}
 </style>
+<!-- Terms and Conditions Modal -->
+<div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="termsModalLabel">Terms and Conditions</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Your terms and conditions content -->
+                <div class="terms-content">
+                    <?php echo nl2br(htmlspecialchars($termsContent)); // Your provided content ?>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
+    <!-- ... modal content ... -->
+    
+ 
+</div> 
+
 </body>
 </html>
 

@@ -11,17 +11,33 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['role'] !== 'admin') {
 // Include database connection
 require_once 'connect.php';
 
-// Get lender ID from session
+// Get admin ID from session
 $admin_id = $_SESSION['id'];
 
-// Fetch lender details from tbl_users
-$query = "SELECT *, DATE_FORMAT(created_at, '%M %d, %Y') as join_date 
-          FROM tbl_users 
-          WHERE user_id = ?";
+// Fetch admin details from tbl_users with error handling
+$query = "SELECT * FROM tbl_users WHERE user_id = ?";
+
 $stmt = $conn->prepare($query);
+if ($stmt === false) {
+    die("Error preparing statement: " . $conn->error);
+}
+
 $stmt->bind_param("i", $admin_id);
-$stmt->execute();
-$admin = $stmt->get_result()->fetch_assoc();
+if (!$stmt->execute()) {
+    die("Error executing query: " . $stmt->error);
+}
+
+$result = $stmt->get_result();
+if (!$result) {
+    die("Error getting result: " . $stmt->error);
+}
+
+$admin = $result->fetch_assoc();
+if (!$admin) {
+    die("No admin found with ID: " . $admin_id);
+}
+
+$stmt->close();
 
 // Fetch lender statistics from tbl_outfit
 // $stats_query = "SELECT 
@@ -61,62 +77,91 @@ if (isset($_POST['logout'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lender Profile - Fashion Share</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        :root { --sidebar-width: 250px; }
         body {
             margin: 0;
             padding: 0;
-            font-family: 'Arial', sans-serif;
-            display: flex;
-            background-color: #f5f5f5;
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8f9fa;
         }
-        
-        /* Sidebar Styles */
         .sidebar {
-            width: 250px;
+            width: var(--sidebar-width);
             height: 100vh;
-            background-color:rgb(91, 9, 9);
-            color: white;
-            padding: 20px 0;
-            box-shadow: 2px 0 5px #444;
             position: fixed;
+            left: 0;
+            top: 0;
+            background: rgb(91, 9, 9);
+            color: white;
+            padding-top: 20px;
+            z-index: 100;
         }
-        
-        .sidebar-header {
-            padding: 0 20px 20px;
-            border-bottom: 1px solid rgb(147, 42, 42);
+        .main-content { 
+            margin-left: var(--sidebar-width); 
+            padding: 20px;
         }
-        
-        .sidebar-header h2 {
-            margin: 0;
-            font-size: 24px;
+        .sidebar-link {
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            display: block;
+            transition: 0.3s;
+            margin-bottom: 5px;
+            border-radius: 5px;
         }
-        
-        .sidebar-header p {
-            margin: 5px 0 0;
-            opacity: 0.7;
+        .sidebar-link:hover { 
+            background: rgb(147, 42, 42); 
+            color: #ecf0f1; 
         }
-        
-        .sidebar-menu {
-            padding: 20px 0;
+        .sidebar-link.active {
+            background: rgb(147, 42, 42);
+            color: white;
         }
-        
-        .menu-item {
-            padding: 12px 20px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            display: flex;
-            align-items: center;
-        }
-        
-        .menu-item:hover {
-            background-color:rgb(147, 42, 42);
-        }
-        
-        .menu-item i {
-            margin-right: 10px;
-            width: 20px;
+        .sidebar-link i {
+            width: 24px;
             text-align: center;
+            margin-right: 8px;
+        }
+        
+        /* Responsive behavior */
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 80px;
+            }
+            .sidebar h4, .sidebar-link span {
+                display: none;
+            }
+            .main-content {
+                margin-left: 80px;
+            }
+            .sidebar-link i {
+                margin-right: 0;
+                font-size: 1.2rem;
+            }
+            .sidebar-link {
+                text-align: center;
+                padding: 15px 5px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+            .main-content {
+                margin-left: 0;
+            }
+            .sidebar-link {
+                display: inline-block;
+                width: auto;
+            }
+            .sidebar h4 {
+                display: block;
+            }
         }
         
         /* Main Content Styles */
@@ -228,33 +273,15 @@ if (isset($_POST['logout'])) {
 <body>
     <!-- Sidebar Navigation -->
     <div class="sidebar">
-        <div class="sidebar-header">
-            <h2>Fashion Share</h2>
-            <p>Lender Dashboard</p>
-        </div>
-        <div class="sidebar-menu">
-        <a href="lender_dashboard.php" class="menu-item" style="text-decoration: none; color: white;">
-                <i class="fas fa-home"></i> Dashboard
-            </a>
-            <a href="lending.php" class="menu-item" style="text-decoration: none; color: white;">
-                <i class="fas fa-plus-circle"></i> Lend Outfit
-            </a>
-            <div class="menu-item">
-                <i class="fas fa-tshirt"></i> My Outfits
-            </div>
-            <div class="menu-item">
-                <i class="fas fa-exchange-alt"></i> Rentals
-            </div>
-            <div class="menu-item">
-                <i class="fas fa-money-bill-wave"></i> Earnings
-            </div>
-            <a href="lender_profile.php" class="menu-item" style="text-decoration: none; color: white;">
-                <i class="fas fa-user"></i> Profile
-            </a>
-            <div class="menu-item">
-                <i class="fas fa-cog"></i> Settings
-            </div>
-        </div>
+        <h4 class="text-center mb-4">Fashion Rental</h4>
+        <nav>
+            <a href="admin_dashboard.php" class="sidebar-link"><i class="fas fa-home"></i> Dashboard</a>
+            <a href="user_management.php" class="sidebar-link"><i class="fas fa-users"></i> User Management</a>
+            <a href="outfit_management.php" class="sidebar-link"><i class="fas fa-tshirt"></i> Outfit Management</a>
+            <a href="orders_admin.php" class="sidebar-link"><i class="fas fa-shopping-cart"></i> Orders</a>
+            <a href="admin_reports.php" class="sidebar-link"><i class="fas fa-chart-bar"></i> Reports</a>
+            <a href="admin_profile.php" class="sidebar-link active"><i class="fas fa-user"></i> Profile</a>
+        </nav>
     </div>
     
     <!-- Main Content -->
@@ -291,11 +318,8 @@ if (isset($_POST['logout'])) {
                     <span><?php echo htmlspecialchars($admin['phone']); ?></span>
                 </div>
                 <div class="info-item">
-                    <label>Admin Since</label>
-                    <span><?php echo htmlspecialchars($admin['join_date']); ?></span>
-                </div>
-                <div class="info-item">
-                    
+                    <label>Role</label>
+                    <span><?php echo htmlspecialchars($admin['role']); ?></span>
                 </div>
             </div>
         </div>

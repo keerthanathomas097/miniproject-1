@@ -35,6 +35,39 @@ if ($cartResult->num_rows > 0) {
     $itemsResult = []; // No items in the cart
 }
 ?>
+<style>
+    .icon-link {
+        position: relative;
+    }
+
+    .cart-badge {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        font-size: 10px;
+        padding: 2px 5px;
+        border-radius: 50%;
+        background-color: #dc3545;
+        color: white;
+        min-width: 15px;
+        height: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transform: scale(0.9);
+        transition: transform 0.2s;
+    }
+
+    .cart-badge.pulse {
+        animation: pulse 0.5s;
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(0.9); }
+        50% { transform: scale(1.2); }
+        100% { transform: scale(0.9); }
+    }
+</style>
 
 <!DOCTYPE html>
 <html lang="en">

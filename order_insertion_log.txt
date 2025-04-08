@@ -1,0 +1,22 @@
+======== NEW REQUEST 2025-03-23 18:16:13 ========
+POST data: Array
+(
+    [outfit_id] => 13
+    [amount] => 6848
+    [payment_method] => credit_card
+)
+
+SESSION data: Array
+(
+    [loggedin] => 1
+    [id] => 1
+    [username] => keerthanaUser
+    [role] => user
+)
+
+Extracted data: user_id=1, outfit_id=13, amount=6848, payment=credit_card
+SQL Query: INSERT INTO tbl_orders (user_id, outfit_id, order_reference, amount, 
+               payment_method, order_status, payment_status, created_at, updated_at) 
+               VALUES (1, 13, 'ORD-67F647E9', 6848, 
+               'credit_card', 'CONFIRMED', 'PAID', '2025-03-23 18:16:13', '2025-03-23 18:16:13')
+SUCCESS! Order inserted with ID: 8

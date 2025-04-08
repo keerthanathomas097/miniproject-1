@@ -48,33 +48,128 @@ $result = $conn->query($query);
     <title>User Management | Fashion Rental</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
-        :root { --sidebar-width: 250px; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+        }
+        
         .sidebar {
-            width: var(--sidebar-width);
-            height: 100vh;
             position: fixed;
             left: 0;
             top: 0;
-            background: rgb(91, 9, 9);
+            bottom: 0;
+            width: 240px;
+            background-color: #800020; /* This is the color you need to change if you want a different shade */
             color: white;
-            padding-top: 20px;
+            z-index: 1000;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
         }
-        .main-content { 
-            margin-left: var(--sidebar-width); 
-            padding: 20px; 
+        
+        /* Brand title styling */
+        .brand-container {
+            padding: 20px 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 10px;
         }
-        .sidebar-link {
+        
+        .brand-name {
+            font-weight: 600;
+            font-size: 22px;
+            margin: 0;
+            padding: 0;
+            letter-spacing: 0.5px;
             color: white;
+        }
+        
+        .brand-subtitle {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 3px;
+            font-weight: 300;
+        }
+        
+        /* Section headers */
+        .sidebar-section {
+            margin-top: 20px;
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+        
+        .sidebar-section-header {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.4);
+            font-weight: 500;
+            margin-bottom: 10px;
+            padding-left: 5px;
+        }
+        
+        /* Navigation links */
+        .sidebar-nav {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .sidebar-nav-item {
+            margin-bottom: 2px;
+        }
+        
+        .sidebar-nav-link {
+            display: flex;
+            align-items: center;
             text-decoration: none;
-            padding: 10px 20px;
-            display: block;
-            transition: 0.3s;
+            color: rgba(255, 255, 255, 0.75);
+            padding: 10px 15px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            font-size: 14px;
+            font-weight: 400;
         }
-        .sidebar-link:hover { 
-            background: rgb(147, 42, 42); 
-            color: #ecf0f1; 
+        
+        .sidebar-nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
         }
+        
+        .sidebar-nav-link.active {
+            background-color: rgba(255, 255, 255, 0.15);
+            color: white;
+            font-weight: 500;
+        }
+        
+        .sidebar-icon {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+            font-size: 16px;
+        }
+        
+        /* Footer */
+        .sidebar-footer {
+            position: absolute;
+            bottom: 15px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.4);
+            padding: 10px 0;
+        }
+        
+        /* Main content area */
+        .main-content {
+            margin-left: 240px;
+            padding: 20px;
+        }
+        
+        /* Keep your existing styles below */
         .dashboard-container {
             padding: 2rem;
             background-color: #f8f9fa;
@@ -125,13 +220,56 @@ $result = $conn->query($query);
 <body>
     <!-- Sidebar -->
     <div class="sidebar">
-        <h4 class="text-center mb-4">Fashion Rental</h4>
-        <nav>
-            <a href="admin_dashboard.php" class="sidebar-link"><i class="fas fa-home me-2"></i> Dashboard</a>
-            <a href="user_management.php" class="sidebar-link" style="background-color: rgb(147, 42, 42);"><i class="fas fa-users me-2"></i> User Management</a>
-            <a href="outfit_management.php" class="sidebar-link"><i class="fas fa-tshirt me-2"></i> Outfit Management</a>
-            <a href="#" class="sidebar-link"><i class="fas fa-shopping-cart me-2"></i> Orders</a>
-        </nav>
+        <div class="brand-container">
+            <h1 class="brand-name">Clover Outfit Rentals</h1>
+            <div class="brand-subtitle">Admin Dashboard</div>
+        </div>
+        
+        <div class="sidebar-section">
+            <h5 class="sidebar-section-header">Main</h5>
+            <ul class="sidebar-nav">
+                <li class="sidebar-nav-item">
+                    <a href="admin_dashboard.php" class="sidebar-nav-link">
+                        <i class="fas fa-home sidebar-icon"></i>
+                        Dashboard
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="user_management.php" class="sidebar-nav-link active">
+                        <i class="fas fa-users sidebar-icon"></i>
+                        User Management
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="outfit_management.php" class="sidebar-nav-link">
+                        <i class="fas fa-tshirt sidebar-icon"></i>
+                        Outfit Management
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="#" class="sidebar-nav-link">
+                        <i class="fas fa-shopping-cart sidebar-icon"></i>
+                        Orders
+                    </a>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="sidebar-section">
+            <h5 class="sidebar-section-header">Account</h5>
+            <ul class="sidebar-nav">
+                <li class="sidebar-nav-item">
+                    <a href="admin_profile.php" class="sidebar-nav-link">
+                        <i class="fas fa-user sidebar-icon"></i>
+                        Profile
+                    </a>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="sidebar-footer">
+            <p>&copy; <?php echo date('Y'); ?> Clover Outfit Rentals</p>
+        </div>
     </div>
 
     <!-- Main Content -->

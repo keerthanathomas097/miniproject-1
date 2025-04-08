@@ -3,45 +3,82 @@ session_start();
 include 'connect.php';
 
 // Check if user is logged in and is a lender
-if (!isset($_SESSION['loggedin']) || $_SESSION['role'] !== 'lender') {
+if (!isset($_SESSION['loggedin']) || !isset($_SESSION['id'])) {
     header("Location: ls.php");
     exit();
 }
 
-// Access lender information
-$lender_id = $_SESSION['id'];
-$lender_name = $_SESSION['username'];
+$user_id = $_SESSION['id'];
 
-// Fetch outfits for this lender
-$query = "SELECT o.*, d.description_text, 
-          s1.subcategory_name as type_name,
-          s2.subcategory_name as size_name,
-          s3.subcategory_name as brand_name
+// Fetch lender details
+$lender_query = "SELECT name, email FROM tbl_users WHERE user_id = ?";
+$lender_stmt = $conn->prepare($lender_query);
+
+if ($lender_stmt === false) {
+    die("Error preparing lender query: " . $conn->error);
+}
+
+$lender_stmt->bind_param("i", $user_id);
+if (!$lender_stmt->execute()) {
+    die("Error executing lender query: " . $lender_stmt->error);
+}
+
+$lender_result = $lender_stmt->get_result();
+$lender = $lender_result->fetch_assoc();
+$lender_stmt->close();
+
+// Fetch active listings count
+$listings_query = "SELECT COUNT(*) as count FROM tbl_outfit WHERE email = ?";
+$listings_stmt = $conn->prepare($listings_query);
+
+if ($listings_stmt === false) {
+    die("Error preparing listings query: " . $conn->error);
+}
+
+$listings_stmt->bind_param("s", $lender['email']);
+if (!$listings_stmt->execute()) {
+    die("Error executing listings query: " . $listings_stmt->error);
+}
+
+$listings_result = $listings_stmt->get_result();
+$listings_count = $listings_result->fetch_assoc()['count'];
+$listings_stmt->close();
+
+// Fetch recent outfits
+$activities_query = "SELECT o.outfit_id, o.status, o.mrp, o.image1, d.description_text, 
+                    b.subcategory_name as brand_name, t.subcategory_name as type_name,
+                    s.subcategory_name as size_name
           FROM tbl_outfit o
           LEFT JOIN tbl_description d ON o.description_id = d.id
-          LEFT JOIN tbl_subcategory s1 ON o.type_id = s1.id
-          LEFT JOIN tbl_subcategory s2 ON o.size_id = s2.id
-          LEFT JOIN tbl_subcategory s3 ON o.brand_id = s3.id
-          WHERE o.user_id = ?
-          ORDER BY o.created_at DESC";
+                    LEFT JOIN tbl_subcategory b ON o.brand_id = b.id
+                    LEFT JOIN tbl_subcategory t ON o.type_id = t.id
+                    LEFT JOIN tbl_subcategory s ON o.size_id = s.id
+                    WHERE o.email = ? 
+                    ORDER BY o.created_at DESC LIMIT 3";
+$activities_stmt = $conn->prepare($activities_query);
 
-$stmt = $conn->prepare($query);
-$stmt->bind_param("i", $lender_id);
-$stmt->execute();
-$result = $stmt->get_result();
+if ($activities_stmt === false) {
+    die("Error preparing activities query: " . $conn->error);
+}
 
-// Get statistics
-$stats_query = "SELECT 
-    COUNT(*) as total_outfits,
-    SUM(CASE WHEN status = 'approved' THEN 1 ELSE 0 END) as approved_outfits,
-    SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending_outfits
-    FROM tbl_outfit 
-    WHERE user_id = ?";
+$activities_stmt->bind_param("s", $lender['email']);
+if (!$activities_stmt->execute()) {
+    die("Error executing activities query: " . $activities_stmt->error);
+}
 
-$stats_stmt = $conn->prepare($stats_query);
-$stats_stmt->bind_param("i", $lender_id);
-$stats_stmt->execute();
-$stats = $stats_stmt->get_result()->fetch_assoc();
+$activities_result = $activities_stmt->get_result();
+$activities = $activities_result->fetch_all(MYSQLI_ASSOC);
+$activities_stmt->close();
+
+// Add this before the outfits-grid div to check image paths
+echo "<!-- Debug Info:\n";
+foreach ($activities as $activity) {
+    $baseImageNumber = str_replace('_image1.jpg', '', $activity['image1']);
+    $imagePath = 'uploads/' . $baseImageNumber . '_image1.jpg';
+    echo "Original image1: " . $activity['image1'] . "\n";
+    echo "Constructed path: " . $imagePath . "\n";
+}
+echo "-->";
 ?>
 
 <!DOCTYPE html>
@@ -210,39 +247,114 @@ $stats = $stats_stmt->get_result()->fetch_assoc();
 
         .outfits-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-            padding: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            padding: 10px 0;
+            justify-items: left;
         }
 
-        .outfit-card {
+        .outfit-dashboard-card {
             background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+            width: 85%;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .outfit-dashboard-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .outfit-image-container {
+            position: relative;
+            width: 100%;
+            height: 250px;
             overflow: hidden;
         }
 
         .outfit-image {
             width: 100%;
-            height: 200px;
+            height: 100%;
             object-fit: cover;
+            transition: transform 0.3s ease;
         }
+
+        .outfit-dashboard-card:hover .outfit-image {
+            transform: scale(1.05);
+        }
+
+        .status-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 8px 15px;
+            border-radius: 20px;
+            color: white;
+            font-weight: 500;
+            font-size: 0.85rem;
+            text-transform: capitalize;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .status-pending { background-color: var(--warning); }
+        .status-approved { background-color: var(--success); }
+        .status-rejected { background-color: var(--danger); }
 
         .outfit-details {
             padding: 15px;
         }
 
-        .outfit-status {
-            display: inline-block;
-            padding: 5px 10px;
-            border-radius: 15px;
-            font-size: 12px;
-            margin-top: 10px;
+        .outfit-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--primary);
         }
 
-        .status-pending { background-color: var(--warning); color: #000; }
-        .status-approved { background-color: var(--success); color: white; }
-        .status-rejected { background-color: var(--danger); color: white; }
+        .outfit-info p {
+            margin: 5px 0;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .outfit-info i {
+            width: 20px;
+            color: var(--secondary);
+        }
+
+        .price-info {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+        }
+
+        .price-info .mrp {
+            color: #888;
+            text-decoration: line-through;
+            font-size: 0.9rem;
+        }
+
+        .price-info .rental {
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .no-image-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f8f9fa;
+            color: #6c757d;
+            font-size: 16px;
+        }
     </style>
 </head>
 <body>
@@ -258,9 +370,9 @@ $stats = $stats_stmt->get_result()->fetch_assoc();
             <a href="lending.php" class="menu-item" style="text-decoration: none; color: white;">
                 <i class="fas fa-plus-circle"></i> Lend Outfit
             </a>
-            <div class="menu-item">
+            <a href="my_outfits.php" class="menu-item" style="text-decoration: none; color: white;">
                 <i class="fas fa-tshirt"></i> My Outfits
-            </div>
+            </a>
             <div class="menu-item">
                 <i class="fas fa-exchange-alt"></i> Rentals
             </div>
@@ -278,45 +390,74 @@ $stats = $stats_stmt->get_result()->fetch_assoc();
 
     <div class="main-content">
         <div class="header">
-            <h1>Welcome back, <?php echo htmlspecialchars($lender_name); ?>!</h1>
+            <h1>Welcome back, <?php echo htmlspecialchars($lender['name'] ?? 'Lender'); ?>!</h1>
             <p>Here's your outfit lending overview</p>
         </div>
 
         <div class="stats-container">
             <div class="stat-card">
-                <h3>Total Outfits</h3>
-                <div class="value"><?php echo $stats['total_outfits']; ?></div>
+                <h3>Active Listings</h3>
+                <div class="value"><?php echo $listings_count; ?></div>
             </div>
             <div class="stat-card">
-                <h3>Approved Outfits</h3>
-                <div class="value"><?php echo $stats['approved_outfits']; ?></div>
+                <h3>Current Rentals</h3>
+                <div class="value">-</div>
             </div>
             <div class="stat-card">
-                <h3>Pending Approval</h3>
-                <div class="value"><?php echo $stats['pending_outfits']; ?></div>
+                <h3>Total Earnings</h3>
+                <div class="value">₹-</div>
+            </div>
+            <div class="stat-card">
+                <h3>Rating</h3>
+                <div class="value">- ⭐</div>
             </div>
         </div>
 
         <div class="recent-activities">
-            <h2>Your Published Outfits</h2>
+            <h2>My Recent Outfits</h2>
             <div class="outfits-grid">
-                <?php while ($outfit = $result->fetch_assoc()): ?>
-                    <div class="outfit-card">
-                        <img src="uploads/<?php echo htmlspecialchars($outfit['image1']); ?>" 
-                             alt="Outfit Image" 
+                <?php if (empty($activities)): ?>
+                    <p>No outfits listed yet</p>
+                <?php else: ?>
+                    <?php foreach ($activities as $activity): 
+                        // Calculate rental price (20% of MRP)
+                        $rental_price = $activity['mrp'] * 0.20;
+                        
+                        // Handle image path - using the same logic as outfit.php
+                        $imagePath = '';
+                        if (!empty($activity['image1'])) {
+                            $baseImageNumber = str_replace('_image1.jpg', '', $activity['image1']);
+                            $imagePath = 'uploads/' . $baseImageNumber . '_image1.jpg';
+                        }
+                    ?>
+                        <div class="outfit-dashboard-card">
+                            <div class="outfit-image-container">
+                                <?php if (!empty($imagePath)): ?>
+                                    <img src="<?php echo htmlspecialchars($imagePath); ?>" 
+                                         alt="<?php echo htmlspecialchars($activity['description_text']); ?>"
                              class="outfit-image">
+                                <?php else: ?>
+                                    <div class="no-image-placeholder">No Image Available</div>
+                                <?php endif; ?>
+                                <span class="status-badge status-<?php echo strtolower($activity['status']); ?>">
+                                    <?php echo htmlspecialchars($activity['status']); ?>
+                                </span>
+                            </div>
                         <div class="outfit-details">
-                            <h4><?php echo htmlspecialchars($outfit['description_text']); ?></h4>
-                            <p>Type: <?php echo htmlspecialchars($outfit['type_name']); ?></p>
-                            <p>Size: <?php echo htmlspecialchars($outfit['size_name']); ?></p>
-                            <p>Brand: <?php echo htmlspecialchars($outfit['brand_name']); ?></p>
-                            <p>MRP: ₹<?php echo htmlspecialchars($outfit['mrp']); ?></p>
-                            <span class="outfit-status status-<?php echo strtolower($outfit['status']); ?>">
-                                <?php echo ucfirst(htmlspecialchars($outfit['status'])); ?>
-                            </span>
+                                <h3 class="outfit-title"><?php echo htmlspecialchars($activity['description_text']); ?></h3>
+                                <div class="outfit-info">
+                                    <p><i class="fas fa-tag"></i> <?php echo htmlspecialchars($activity['brand_name']); ?></p>
+                                    <p><i class="fas fa-tshirt"></i> <?php echo htmlspecialchars($activity['type_name']); ?></p>
+                                    <p><i class="fas fa-ruler"></i> Size: <?php echo htmlspecialchars($activity['size_name']); ?></p>
+                                    <div class="price-info">
+                                        <p class="mrp">MRP: ₹<?php echo number_format($activity['mrp'], 2); ?></p>
+                                        <p class="rental">Rental: ₹<?php echo number_format($rental_price, 2); ?></p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                <?php endwhile; ?>
+                    <?php endforeach; ?>
+                <?php endif; ?>
             </div>
         </div>
     </div>

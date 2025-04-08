@@ -1,0 +1,12 @@
+Order request received: 2025-03-23 10:37:39
+POST data: Array
+(
+    [outfit_id] => 12
+    [amount] => 8919
+    [payment_method] => COD
+    [user_id] => 1
+    [start_date] => 2025-03-29
+    [end_date] => 2025-04-02
+)
+
+Error: Error preparing statement: Unknown column 'start_date' in 'field list'

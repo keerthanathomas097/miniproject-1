@@ -1,74 +1,106 @@
 /* Main Container Styles */
 .product-details-container {
-    padding: 60px 40px;
-    background-color: #fff;
-    margin: 30px 80px;
-    max-width: 1400px;
+  padding: 60px 40px;
+  background-color: #fff;
+  margin: 30px 80px;
+  max-width: 1400px;
 }
 
 /* Image Gallery Styles */
 .image-gallery {
-    display: flex;
-    gap: 20px;
+  position: relative;
+  display: flex;
+  gap: 20px;
 }
 
 .thumbnails {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .thumbnail {
-    width: 80px;
-    height: 100px;
-    object-fit: cover;
-    cursor: pointer;
-    border: 2px solid transparent;
-    border-radius: 4px;
-    transition: border-color 0.3s ease;
+  width: 80px;
+  height: 100px;
+  object-fit: cover;
+  cursor: pointer;
+  border: 2px solid transparent;
+  border-radius: 4px;
+  transition: border-color 0.3s ease;
 }
 
 .thumbnail.active {
-    border-color: #8d2626;
+  border-color: #8d2626;
 }
 
 .main-image {
-    flex-grow: 1;
+  position: relative;
+  flex-grow: 1;
+  max-width: 600px;
+}
+
+.main-image-container {
+  position: relative;
+  width: 100%;
 }
 
 .main-image img {
-    width: 100%;
-    max-height: 600px;
-    object-fit: contain;
-    border-radius: 8px;
+  width: 100%;
+  height: auto;
+  cursor: crosshair;
+}
+
+.zoom-lens {
+  position: absolute;
+  border: 2px solid #fff;
+  width: 150px;
+  height: 150px;
+  background: rgba(255, 255, 255, 0.2);
+  cursor: none;
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.3);
+}
+
+.zoom-result {
+  position: fixed;
+  top: 50%;
+  right: 50px;
+  transform: translateY(-50%);
+  width: 500px;
+  height: 500px;
+  border: 2px solid #ddd;
+  background-color: white;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  z-index: 1000;
+  overflow: hidden;
+  pointer-events: none;
 }
 
 /* Product Info Styles */
 .product-info {
-    padding: 0 20px;
+  padding: 0 20px;
 }
 
 .product-title {
-    font-size: 28px;
-    color: #333;
-    margin-bottom: 10px;
+  font-size: 28px;
+  color: #333;
+  margin-bottom: 10px;
 }
 
 .product-price {
-    font-size: 24px;
-    color: #8d2626;
-    font-weight: bold;
-    margin-bottom: 20px;
+  font-size: 24px;
+  color: #8d2626;
+  font-weight: bold;
+  margin-bottom: 20px;
 }
 
 /* Size Chart Icon */
 .size-chart {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 20px;
-    cursor: pointer;
-    color: #666;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  cursor: pointer;
+  color: #666;
 }
 
 /* Form Styles */
@@ -76,124 +108,478 @@
 .size-selection,
 .rental-duration,
 .date-selection {
-    margin-bottom: 30px;
+  margin-bottom: 30px;
 }
 
 h4 {
-    color: #333;
-    margin-bottom: 15px;
-    font-size: 18px;
+  color: #333;
+  margin-bottom: 15px;
+  font-size: 18px;
 }
 
 .form-group {
-    margin-bottom: 15px;
+  margin-bottom: 15px;
 }
 
 .form-group label {
-    display: block;
-    margin-bottom: 5px;
-    color: #666;
+  display: block;
+  margin-bottom: 5px;
+  color: #666;
 }
 
 .form-control {
-    width: 100%;
-    padding: 8px 12px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 16px;
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
 }
 
 /* Size Buttons */
 .size-buttons {
-    display: flex;
-    gap: 10px;
+  display: flex;
+  gap: 10px;
 }
 
 .size-btn {
-    padding: 8px 20px;
-    border: 2px solid #8d2626;
-    background: none;
-    color: #8d2626;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.3s ease;
+  padding: 8px 20px;
+  border: 2px solid #8d2626;
+  background: none;
+  color: #8d2626;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
 .size-btn:hover,
 .size-btn.active {
-    background-color: #8d2626;
-    color: white;
+  background-color: #8d2626;
+  color: white;
 }
 
 /* Duration Options */
 .duration-options {
-    display: flex;
-    gap: 20px;
+  display: flex;
+  gap: 20px;
 }
 
 .duration-options label {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
 }
 
 /* Date Selection */
 .rental-dates {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
-    margin-top: 15px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-top: 15px;
 }
 
 /* Submit Button */
 .submit-btn {
+  width: 100%;
+  padding: 12px;
+  background-color: #8d2626;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 18px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.submit-btn:hover {
+  background-color: #702020;
+}
+.user-name {
+  color: #800020 !important;
+  font-weight: 500;
+  padding: 8px 15px;
+  margin-right: 10px;
+  border-radius: 4px;
+  background-color: rgba(128, 0, 32, 0.1);
+}
+
+.nav-link.user-name:hover {
+  background-color: rgba(128, 0, 32, 0.15);
+  cursor: default;
+}
+/* Add these styles to your existing CSS */
+.size-chart {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    transition: background-color 0.2s ease;
+}
+
+.size-chart:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.size-chart i {
+    color: #800020;
+}
+
+.size-chart span {
+    color: #333;
+    text-decoration: underline;
+}
+
+/* Modal styles */
+.modal-body table {
+    margin-top: 15px;
+}
+
+.modal-body th {
+    background-color: #f8f9fa;
+    text-align: center;
+}
+
+.modal-body td {
+    text-align: center;
+}
+
+.size-chart-note {
+    border-top: 1px solid #dee2e6;
+    padding-top: 15px;
+}
+/* Responsive Design */
+@media (max-width: 768px) {
+  .image-gallery {
+    flex-direction: column-reverse;
+  }
+
+  .thumbnails {
+    flex-direction: row;
+    overflow-x: auto;
+  }
+
+  .thumbnail {
+    width: 60px;
+    height: 80px;
+  }
+
+  .rental-dates {
+    grid-template-columns: 1fr;
+  }
+
+  .product-details-container {
+    margin: 30px 20px;
+  }
+}
+
+.btn-dark {
+  background-color: #800020; /* Dark red color */
+  border-color: #800020; /* Match border color */
+}
+
+.btn-dark:hover {
+  background-color: #600018; /* Darker shade on hover */
+  border-color: #600018; /* Match border color on hover */
+}
+
+.price-breakdown {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.price-details {
+    margin-top: 10px;
+    border-top: 1px solid #dee2e6;
+    padding-top: 10px;
+}
+
+.price-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+    color: #495057;
+}
+
+.text-success {
+    color: #198754 !important;
+    font-size: 0.8rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1400px) {
+    .zoom-result {
+        right: -420px;
+        width: 400px;
+        height: 400px;
+    }
+}
+
+@media (max-width: 992px) {
+    .zoom-result {
+        display: none !important; /* Disable zoom on mobile */
+    }
+}
+
+/* Hide zoom on mobile */
+@media (max-width: 1200px) {
+    .zoom-result, .zoom-lens {
+        display: none !important;
+    }
+}
+
+/* Review Section Styles */
+.reviews-section {
+    padding: 30px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.section-title {
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 10px;
+    margin-bottom: 30px;
+    color: #333;
+}
+
+.rating-summary {
+    border: none;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+    border-radius: 10px;
+    padding: 15px;
+}
+
+.average-rating {
+    font-size: 42px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.average-rating small {
+    font-size: 16px;
+    color: #6c757d;
+    font-weight: 400;
+}
+
+.stars-display {
+    font-size: 24px;
+    color: #ffc107;
+    margin-bottom: 10px;
+}
+
+.review-count {
+    color: #6c757d;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+.write-review-btn {
+    width: 100%;
+    padding: 10px 0;
+}
+
+.reviews-list {
+    max-height: 600px;
+    overflow-y: auto;
+    padding-right: 15px;
+}
+
+.review-item {
+    border-bottom: 1px solid #e9ecef;
+    padding: 20px 0;
+}
+
+.review-item:last-child {
+    border-bottom: none;
+}
+
+.review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 15px;
+}
+
+.reviewer-info {
+    display: flex;
+    align-items: center;
+}
+
+.reviewer-avatar {
+    width: 40px;
+    height: 40px;
+    background-color: #800020;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    margin-right: 15px;
+}
+
+.reviewer-name {
+    font-weight: 600;
+    color: #333;
+}
+
+.review-date {
+    font-size: 12px;
+    color: #6c757d;
+}
+
+.review-rating {
+    color: #ffc107;
+}
+
+.review-content {
+    color: #495057;
+    line-height: 1.6;
+}
+
+.no-reviews {
+    text-align: center;
+    padding: 50px 0;
+    color: #6c757d;
+}
+
+.no-reviews i {
+    font-size: 48px;
+    margin-bottom: 15px;
+    opacity: 0.5;
+}
+
+/* Star Rating Input Styles */
+.rating-input {
+    text-align: center;
+}
+
+.star-rating {
+    display: inline-flex;
+    flex-direction: row-reverse;
+    font-size: 30px;
+}
+
+.star-rating input {
+    display: none;
+}
+
+.star-rating label {
+    cursor: pointer;
+    color: #ccc;
+    padding: 0 5px;
+}
+
+.star-rating label:before {
+    content: '\f005';
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+}
+
+.star-rating input:checked ~ label,
+.star-rating label:hover,
+.star-rating label:hover ~ label {
+    color: #ffc107;
+}
+
+/* Make sure focus state doesn't override hover */
+.star-rating input:checked + label:hover,
+.star-rating input:checked ~ label:hover,
+.star-rating input:checked ~ label:hover ~ label,
+.star-rating label:hover ~ input:checked ~ label {
+    color: #ffdb70;
+}
+
+/* Modal Styles */
+.modal-header {
+    background-color: #800020;
+    color: white;
+}
+
+.modal-footer .btn-primary {
+    background-color: #800020;
+    border-color: #800020;
+}
+
+.modal-footer .btn-primary:hover {
+    background-color: #600018;
+    border-color: #600018;
+}
+
+/* Additional styles for star rating */
+.star-rating label.active,
+.star-rating label.active ~ label {
+    color: #ffc107 !important;
+}
+
+.star-rating label:hover,
+.star-rating label:hover ~ label {
+    color: #ffdb70 !important;
+}
+
+/* Fix modal z-index to ensure it appears above other elements */
+.modal {
+    z-index: 1050;
+}
+
+/* Make sure modal backdrop covers the entire screen */
+.modal-backdrop {
+    z-index: 1040;
+}
+
+.form-disabled {
+    opacity: 0.7;
+    pointer-events: none;
+    user-select: none;
+}
+
+.form-disabled input,
+.form-disabled button,
+.form-disabled select,
+.form-disabled textarea,
+.form-disabled .size-btn,
+.form-disabled .duration-options {
+    background-color: #f8f9fa !important;
+    border-color: #dee2e6 !important;
+    cursor: not-allowed !important;
+    opacity: 0.7;
+}
+
+.lend-notice {
+    background-color: rgba(128, 0, 32, 0.1);
+    border: 1px solid rgba(128, 0, 32, 0.3);
+    color: #800020;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    text-align: center;
+    font-weight: 500;
+}
+
+.back-button {
+    display: block;
     width: 100%;
     padding: 12px;
-    background-color: #8d2626;
+    background-color: #6c757d;
     color: white;
     border: none;
     border-radius: 4px;
     font-size: 18px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    text-align: center;
+    text-decoration: none;
+    margin-top: 20px;
 }
 
-.submit-btn:hover {
-    background-color: #702020;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-    .image-gallery {
-        flex-direction: column-reverse;
-    }
-
-    .thumbnails {
-        flex-direction: row;
-        overflow-x: auto;
-    }
-
-    .thumbnail {
-        width: 60px;
-        height: 80px;
-    }
-
-    .rental-dates {
-        grid-template-columns: 1fr;
-    }
-
-    .product-details-container {
-        margin: 30px 20px;
-    }
-}
-
-.btn-dark {
-    background-color: #800020; /* Dark red color */
-    border-color: #800020; /* Match border color */
-}
-
-.btn-dark:hover {
-    background-color: #600018; /* Darker shade on hover */
-    border-color: #600018; /* Match border color on hover */
+.back-button:hover {
+    background-color: #5a6268;
+    color: white;
+    text-decoration: none;
 }

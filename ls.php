@@ -169,6 +169,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['signin'])) {
                 $_SESSION['role'] = $user['role'];
                 $_SESSION['show_welcome'] = true;
                 
+                // Log the role for debugging
+                error_log("User logged in: " . $user['name'] . " with role: " . $user['role']);
+                
                 // Redirect based on role
                 if ($user['role'] === 'admin') {
                     header("Location: admin_dashboard.php");
@@ -211,10 +214,24 @@ $errors = ['signup' => '', 'signin' => ''];
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Meta tags first -->
     <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+    <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin-allow-popups">
+
+    <!-- Firebase SDK scripts -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-analytics-compat.js"></script>
+
+    <!-- Your custom scripts should come after Firebase SDK -->
+    <script src="firebase-config.js"></script>
+    
     <title>Sign In / Sign Up</title>
-    <meta name="google-signin-client_id" content="YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
     @import url('https://fonts.googleapis.com/css?family=Montserrat:400,800');
 
@@ -538,9 +555,35 @@ $errors = ['signup' => '', 'signin' => ''];
         color: #702020;
         text-decoration: underline;
     }
+
+    /* Add this to your existing styles */
+    .google-btn i.fa-spinner {
+        margin-right: 8px;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .fa-spin {
+        animation: spin 1s linear infinite;
+    }
     </style>
+    <script>
+        // Check if Firebase is loaded correctly
+        window.addEventListener('load', function() {
+            if (typeof firebase === 'undefined') {
+                console.error('Firebase failed to load');
+                alert('There was an error loading the authentication system. Please refresh the page and try again.');
+            }
+        });
+    </script>
 </head>
 <body>
+    <div id="firebaseError" style="display: none; background-color: #ffebee; color: #c62828; padding: 10px; margin: 10px 0; border-radius: 4px; text-align: center;">
+        There was an error loading the authentication system. Please refresh the page and try again.
+    </div>
     <div class="container" id="container">
         <!-- Sign Up Form -->
         <div class="form-container sign-up-container">
@@ -559,11 +602,11 @@ $errors = ['signup' => '', 'signin' => ''];
                 <div id="mobile-error" class="error-message"></div>
                 
                 <div class="social-container">
-                    <div class="google-btn" id="googleSignIn">
+                    <div class="google-btn" id="googleSignUpBtn">
                         <div class="google-icon-wrapper">
                             <img class="google-icon" src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg"/>
                         </div>
-                        <p class="btn-text">Continue with Google</p>
+                        <p class="btn-text">Sign up with Google</p>
                     </div>
                 </div>
                 
@@ -584,11 +627,11 @@ $errors = ['signup' => '', 'signin' => ''];
                 <a href="forgot_password.php" class="forgot-password">Forgot your password?</a>
                 
                 <div class="social-container">
-                    <div class="google-btn" id="googleSignIn">
+                    <div class="google-btn" id="googleSignInBtn">
                         <div class="google-icon-wrapper">
                             <img class="google-icon" src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg"/>
                         </div>
-                        <p class="btn-text">Continue with Google</p>
+                        <p class="btn-text">Sign in with Google</p>
                     </div>
                 </div>
                 
@@ -792,63 +835,111 @@ $errors = ['signup' => '', 'signin' => ''];
             });
         });
 
-        // Google Sign-In Initialization
-        function initGoogleSignIn() {
-            gapi.load('auth2', function() {
-                gapi.auth2.init({
-                    client_id: '628282840516-vdmofrmhm0ubipbpb2hafj6m3ptsacve.apps.googleusercontent.com'
-                }).then(function(auth2) {
-                    // Attach click handler to both sign-in and sign-up buttons
-                    document.querySelectorAll('.google-btn').forEach(function(button) {
-                        button.addEventListener('click', function() {
-                            auth2.signIn().then(function(googleUser) {
-                                // Handle successful sign-in
-                                const profile = googleUser.getBasicProfile();
-                                const userData = {
-                                    id: profile.getId(),
-                                    name: profile.getName(),
-                                    email: profile.getEmail(),
-                                    imageUrl: profile.getImageUrl()
-                                };
-                                // Send to your server for processing
-                                handleGoogleSignIn(userData);
-                            }).catch(function(error) {
-                                console.error('Google Sign-In error:', error);
-                            });
-                        });
-                    });
-                });
-            });
-        }
+        // Initialize Firebase Auth provider
+        const provider = new firebase.auth.GoogleAuthProvider();
+        
+        // Handle Google Sign In
+        document.addEventListener('DOMContentLoaded', function() {
+            async function handleGoogleAuth(isSignUp = false) {
+                const button = isSignUp ? 
+                    document.getElementById('googleSignUpBtn') : 
+                    document.getElementById('googleSignInBtn');
+                
+                try {
+                    button.style.opacity = '0.7';
+                    button.style.pointerEvents = 'none';
+                    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
 
-        function handleGoogleSignIn(userData) {
-            // Send the data to your PHP backend
-            fetch('handle_google_signin.php', {
+                    const provider = new firebase.auth.GoogleAuthProvider();
+                    provider.setCustomParameters({
+                        prompt: 'select_account'
+                    });
+
+                    const result = await firebase.auth().signInWithPopup(provider);
+                    const user = result.user;
+
+                    if (!user) {
+                        throw new Error('No user data available');
+                    }
+
+                    const userData = {
+                        name: user.displayName,
+                        email: user.email,
+                        uid: user.uid,
+                        imageUrl: user.photoURL
+                    };
+
+                    const response = await fetch('handle_google_auth.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(userData)
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    window.location.href = 'index.php'; // Redirect after successful sign-in
-                } else {
-                    alert('Sign-in failed: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred during sign-in');
-            });
-        }
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify(userData),
+                        credentials: 'same-origin'
+                    });
 
-        // Load Google Sign-In API
-        const script = document.createElement('script');
-        script.src = 'https://apis.google.com/js/platform.js';
-        script.onload = initGoogleSignIn;
-        document.head.appendChild(script);
+                    let responseText = await response.text();
+                    // Remove any HTML tags or whitespace before the JSON
+                    responseText = responseText.replace(/^\s*<[^>]*>|<[^>]*>\s*$/g, '').trim();
+                    
+                    console.log('Cleaned response:', responseText);
+                    
+                    let data;
+                    try {
+                        data = JSON.parse(responseText);
+                    } catch (e) {
+                        console.error('Parse error:', e);
+                        console.error('Response text:', responseText);
+                        throw new Error('Invalid server response');
+                    }
+
+                if (data.success) {
+                        window.location.href = data.redirect || 'index.php';
+                } else {
+                        throw new Error(data.message || 'Authentication failed');
+                    }
+
+                } catch (error) {
+                    console.error('Authentication error:', error);
+                    let errorMessage = 'Authentication failed: ';
+
+                    switch (error.code) {
+                        case 'auth/popup-closed-by-user':
+                            errorMessage = 'Sign-in window was closed. Please try again.';
+                            break;
+                        case 'auth/network-request-failed':
+                            errorMessage = 'Network error. Please check your internet connection.';
+                            break;
+                        case 'auth/popup-blocked':
+                            errorMessage = 'Pop-up was blocked. Please allow pop-ups for this site.';
+                            break;
+                        default:
+                            errorMessage += error.message;
+                    }
+
+                    alert(errorMessage);
+
+                } finally {
+                    button.style.opacity = '1';
+                    button.style.pointerEvents = 'auto';
+                    button.innerHTML = isSignUp ? 
+                        '<div class="google-icon-wrapper"><img class="google-icon" src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg"/></div><p class="btn-text">Sign up with Google</p>' :
+                        '<div class="google-icon-wrapper"><img class="google-icon" src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg"/></div><p class="btn-text">Sign in with Google</p>';
+                }
+            }
+
+            // Add click handlers to Google buttons
+            document.getElementById('googleSignInBtn').addEventListener('click', (e) => {
+                e.preventDefault();
+                handleGoogleAuth(false);
+            });
+
+            document.getElementById('googleSignUpBtn').addEventListener('click', (e) => {
+                e.preventDefault();
+                handleGoogleAuth(true);
+            });
+        });
     </script>
 </body>
 </html>
