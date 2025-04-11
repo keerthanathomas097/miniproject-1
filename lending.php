@@ -741,6 +741,213 @@ if (empty($_POST['email'])) {
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get all form elements
+            const form = document.getElementById('outfitForm');
+            const submitButton = form.querySelector('button[type="submit"]');
+            const termsCheckbox = document.getElementById('termsCheckbox');
+
+            // Get all form fields
+            const brandSelect = form.querySelector('select[name="brand_id"]');
+            const emailInput = form.querySelector('input[name="email"]');
+            const sizeSelect = form.querySelector('select[name="size_id"]');
+            const genderSelect = form.querySelector('select[name="gender_id"]');
+            const purchaseYearInput = form.querySelector('input[name="purchaseYear"]');
+            const mrpInput = form.querySelector('input[name="mrp"]');
+            const addressInput = form.querySelector('textarea[name="address"]');
+            const cityInput = form.querySelector('input[name="city"]');
+            const hasBillSelect = form.querySelector('select[name="hasBill"]');
+            const typeSelect = form.querySelector('select[name="type_id"]');
+            const image1Input = form.querySelector('input[name="image1"]');
+            const proofImageInput = form.querySelector('input[name="proofImage"]');
+
+            // Create error message elements for each field
+            function createErrorElement(field, message) {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'invalid-feedback';
+                errorDiv.textContent = message;
+                field.parentNode.appendChild(errorDiv);
+                return errorDiv;
+            }
+
+            // Validation rules
+            const validationRules = {
+                brand_id: {
+                    validate: (value) => value !== '',
+                    message: 'Please select a brand'
+                },
+                email: {
+                    validate: (value) => {
+                        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                        return emailRegex.test(value);
+                    },
+                    message: 'Please enter a valid email address'
+                },
+                size_id: {
+                    validate: (value) => value !== '',
+                    message: 'Please select a size'
+                },
+                gender_id: {
+                    validate: (value) => value !== '',
+                    message: 'Please select a gender'
+                },
+                purchaseYear: {
+                    validate: (value) => {
+                        const year = parseInt(value);
+                        const currentYear = new Date().getFullYear();
+                        return year >= 2000 && year <= currentYear;
+                    },
+                    message: 'Please enter a valid year between 2000 and current year'
+                },
+                mrp: {
+                    validate: (value) => {
+                        const price = parseInt(value);
+                        return price >= 30000;
+                    },
+                    message: 'MRP must be at least ₹30,000'
+                },
+                address: {
+                    validate: (value) => value.trim().length >= 10,
+                    message: 'Address must be at least 10 characters long'
+                },
+                city: {
+                    validate: (value) => value.trim().length >= 3,
+                    message: 'City name must be at least 3 characters long'
+                },
+                hasBill: {
+                    validate: (value) => value !== '',
+                    message: 'Please specify if you have a bill'
+                },
+                type_id: {
+                    validate: (value) => value !== '',
+                    message: 'Please select an outfit type'
+                },
+                image1: {
+                    validate: (input) => {
+                        if (!input.files.length) return false;
+                        const file = input.files[0];
+                        const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+                        const maxSize = 5 * 1024 * 1024; // 5MB
+                        return validTypes.includes(file.type) && file.size <= maxSize;
+                    },
+                    message: 'Please upload a valid image file (JPG/PNG, max 5MB)'
+                },
+                proofImage: {
+                    validate: (input) => {
+                        if (!input.files.length) return false;
+                        const file = input.files[0];
+                        const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+                        const maxSize = 5 * 1024 * 1024; // 5MB
+                        return validTypes.includes(file.type) && file.size <= maxSize;
+                    },
+                    message: 'Please upload a valid proof image (JPG/PNG, max 5MB)'
+                }
+            };
+
+            // Function to validate a single field
+            function validateField(field) {
+                const fieldName = field.name;
+                const rule = validationRules[fieldName];
+                if (!rule) return true;
+
+                const isValid = rule.validate(field);
+                const errorElement = field.parentNode.querySelector('.invalid-feedback') 
+                    || createErrorElement(field, rule.message);
+
+                if (!isValid) {
+                    field.classList.add('is-invalid');
+                    field.classList.remove('is-valid');
+                    errorElement.style.display = 'block';
+                } else {
+                    field.classList.remove('is-invalid');
+                    field.classList.add('is-valid');
+                    errorElement.style.display = 'none';
+                }
+
+                return isValid;
+            }
+
+            // Function to check if all fields are valid
+            function checkFormValidity() {
+                let isValid = true;
+                
+                // Validate all fields
+                Object.keys(validationRules).forEach(fieldName => {
+                    const field = form.querySelector(`[name="${fieldName}"]`);
+                    if (field && !validateField(field)) {
+                        isValid = false;
+                    }
+                });
+
+                // Check terms checkbox
+                if (!termsCheckbox.checked) {
+                    isValid = false;
+                    termsCheckbox.parentNode.querySelector('.invalid-feedback').style.display = 'block';
+                } else {
+                    termsCheckbox.parentNode.querySelector('.invalid-feedback').style.display = 'none';
+                }
+
+                // Enable/disable submit button
+                submitButton.disabled = !isValid;
+                return isValid;
+            }
+
+            // Add event listeners for real-time validation
+            [brandSelect, emailInput, sizeSelect, genderSelect, typeSelect, hasBillSelect].forEach(select => {
+                select.addEventListener('change', () => {
+                    validateField(select);
+                    checkFormValidity();
+                });
+            });
+
+            [emailInput, purchaseYearInput, mrpInput, addressInput, cityInput].forEach(input => {
+                input.addEventListener('input', () => {
+                    validateField(input);
+                    checkFormValidity();
+                });
+
+                input.addEventListener('blur', () => {
+                    validateField(input);
+                    checkFormValidity();
+                });
+            });
+
+            [image1Input, proofImageInput].forEach(input => {
+                input.addEventListener('change', () => {
+                    validateField(input);
+                    checkFormValidity();
+                });
+            });
+
+            termsCheckbox.addEventListener('change', checkFormValidity);
+
+            // Form submission handler
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                if (checkFormValidity()) {
+                    // If all validations pass, submit the form
+                    this.submit();
+                } else {
+                    // Show all error messages
+                    Object.keys(validationRules).forEach(fieldName => {
+                        const field = form.querySelector(`[name="${fieldName}"]`);
+                        if (field) validateField(field);
+                    });
+
+                    // Scroll to first error
+                    const firstError = form.querySelector('.is-invalid');
+                    if (firstError) {
+                        firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }
+            });
+
+            // Initial form validation
+            checkFormValidity();
+        });
+    </script>
+    <script>
     document.addEventListener("DOMContentLoaded", function() {
         const designerInput = document.querySelector('input[name="designer"]');
         const sizeInput = document.querySelector('select[name="size"]');
@@ -865,218 +1072,89 @@ if (empty($_POST['email'])) {
     });
     </script>
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const form = document.getElementById('outfitForm');
-        const submitBtn = document.getElementById('submitBtn');
-        
-        // Validation rules
-        const validationRules = {
-            image1: {
-                validate: (input) => {
-                    if (!input.files.length) return 'Image 1 is required';
-                    const file = input.files[0];
-                    if (!['image/jpeg', 'image/png', 'image/jpg'].includes(file.type)) {
-                        return 'Please upload a valid image file (JPG, JPEG, PNG)';
-                    }
-                    if (file.size > 5 * 1024 * 1024) {
-                        return 'Image must be less than 5MB';
-                    }
-                    return '';
-                }
-            },
-            brand_id: {
-                validate: (input) => input.value ? '' : 'Please select a brand'
-            },
-            email: {
-                validate: (input) => {
-                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                    if (!input.value) return 'Email is required';
-                    if (!emailRegex.test(input.value)) return 'Please enter a valid email address';
-                    return '';
-                }
-            },
-            size_id: {
-                validate: (input) => input.value ? '' : 'Please select a size'
-            },
-            gender_id: {
-                validate: (input) => input.value ? '' : 'Please select a category'
-            },
-            purchaseYear: {
-                validate: (input) => {
-                    const year = parseInt(input.value);
-                    const currentYear = new Date().getFullYear();
-                    if (!input.value) return 'Purchase year is required';
-                    if (year < 2000 || year > currentYear) {
-                        return `Year must be between 2000 and ${currentYear}`;
-                    }
-                    return '';
-                }
-            },
-            mrp: {
-                validate: (input) => {
-                    if (!input.value) return 'MRP is required';
-                    if (!/^\d+$/.test(input.value)) return 'Please enter a valid number';
-                    if (parseInt(input.value) <= 0) return 'MRP must be greater than 0';
-                    return '';
-                }
-            },
-            address: {
-                validate: (input) => {
-                    if (!input.value.trim()) return 'Address is required';
-                    if (input.value.trim().length < 10) return 'Please enter a complete address';
-                    return '';
-                }
-            },
-            city: {
-                validate: (input) => {
-                    if (!input.value.trim()) return 'City is required';
-                    if (input.value.trim().length < 3) return 'Please enter a valid city name';
-                    return '';
-                }
-            },
-            hasBill: {
-                validate: (input) => input.value ? '' : 'Please specify if you have a bill'
-            }
-        };
-
-        // Function to validate a single field
-        function validateField(input) {
-            const rule = validationRules[input.id];
-            if (!rule) return true;
-
-            const errorElement = document.getElementById(`${input.id}Error`);
-            if (!errorElement) return true;
-
-            const errorMessage = rule.validate(input);
-            errorElement.textContent = errorMessage;
-            errorElement.style.display = errorMessage ? 'block' : 'none';
-
-            return !errorMessage;
-        }
-
-        // Add validation listeners to all form fields
-        Object.keys(validationRules).forEach(fieldId => {
-            const input = document.getElementById(fieldId);
-            if (input) {
-                input.addEventListener('input', () => {
-                    validateField(input);
-                    checkFormValidity();
-                });
-                input.addEventListener('change', () => {
-                    validateField(input);
-                    checkFormValidity();
-                });
-            }
-        });
-
-        // Check if all fields are valid
-        function checkFormValidity() {
-            const isValid = Object.keys(validationRules).every(fieldId => {
-                const input = document.getElementById(fieldId);
-                return input && validateField(input);
-            });
-            
-            submitBtn.disabled = !isValid;
-            return isValid;
-        }
-
-        // Form submission handler
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            if (checkFormValidity()) {
-                // If using AJAX:
-                const formData = new FormData(form);
-                fetch('lending.php', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => response.text())
-                .then(data => {
-                    if (data.includes('success')) {
-                        alert('Outfit listed successfully!');
-                        form.reset();
-                    } else {
-                        alert('There was an error. Please try again.');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred. Please try again.');
-                });
-            }
-        });
-    });
-    </script>
-    <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Get all form elements
     const form = document.getElementById('outfitForm');
     const inputs = form.querySelectorAll('input, select, textarea');
     const submitButton = form.querySelector('button[type="submit"]');
-
+    
     // Validation rules
     const validationRules = {
+        image1: {
+            validate: (input) => {
+                if (!input.files.length) return 'Image 1 is required';
+                const file = input.files[0];
+                if (!['image/jpeg', 'image/png', 'image/jpg'].includes(file.type)) {
+                    return 'Please upload a valid image file (JPG, JPEG, PNG)';
+                }
+                if (file.size > 5 * 1024 * 1024) {
+                    return 'Image must be less than 5MB';
+                }
+                return '';
+            }
+        },
         brand_id: {
-            required: true,
-            message: 'Please select a brand'
+            validate: (input) => input.value ? '' : 'Please select a brand'
         },
         email: {
-            required: true,
-            pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-            message: 'Please enter a valid email address'
+            validate: (input) => {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!input.value) return 'Email is required';
+                if (!emailRegex.test(input.value)) return 'Please enter a valid email address';
+                return '';
+            }
         },
         size_id: {
-            required: true,
-            message: 'Please select a size'
+            validate: (input) => input.value ? '' : 'Please select a size'
         },
         gender_id: {
-            required: true,
-            message: 'Please select a category'
+            validate: (input) => input.value ? '' : 'Please select a category'
         },
         purchaseYear: {
-            required: true,
-            validate: (value) => {
-                const year = parseInt(value);
-                if (isNaN(year)) return 'Please enter a valid year';
-                if (year < 2000) return 'Year must be 2000 or later';
-                if (year > 2024) return 'Year cannot be greater than 2024';
+            validate: (input) => {
+                const year = parseInt(input.value);
+                const currentYear = new Date().getFullYear();
+                if (!input.value) return 'Purchase year is required';
+                if (year < 2000 || year > currentYear) {
+                    return `Year must be between 2000 and ${currentYear}`;
+                }
                 return '';
             }
         },
         mrp: {
-            required: true,
-            validate: (value) => {
-                const price = parseInt(value);
-                if (isNaN(price)) return 'Please enter a valid price';
-                if (price < 30000) return 'MRP must be at least ₹30,000';
-                if (price > 1000000) return 'MRP seems too high, please verify';
+            validate: (input) => {
+                if (!input.value) return 'MRP is required';
+                if (!/^\d+$/.test(input.value)) return 'Please enter a valid number';
+                if (parseInt(input.value) <= 0) return 'MRP must be greater than 0';
                 return '';
             }
         },
         address: {
-            required: true,
-            minLength: 10,
-            message: 'Please enter a complete address (minimum 10 characters)'
+            validate: (input) => {
+                if (!input.value.trim()) return 'Address is required';
+                if (input.value.trim().length < 10) return 'Please enter a complete address';
+                return '';
+            }
         },
         city: {
-            required: true,
-            minLength: 3,
-            message: 'Please enter a valid city name'
+            validate: (input) => {
+                if (!input.value.trim()) return 'City is required';
+                if (input.value.trim().length < 3) return 'Please enter a valid city name';
+                return '';
+            }
         },
         hasBill: {
-            required: true,
-            message: 'Please specify if you have a bill'
+            validate: (input) => input.value ? '' : 'Please specify if you have a bill'
         }
     };
 
     // Function to validate a single field
-    function validateField(input) {
-        const fieldName = input.id || input.name;
-        const errorSpan = document.getElementById(`${fieldName}Error`) || 
-                         input.parentElement.querySelector('.error-message');
+    function validateField(field) {
+        const fieldName = field.id || field.name;
+        const errorElement = document.getElementById(`${fieldName}Error`) || 
+                         field.parentElement.querySelector('.error-message');
         
-        if (!errorSpan) return true;
+        if (!errorElement) return true;
 
         const rule = validationRules[fieldName];
         if (!rule) return true;
@@ -1084,33 +1162,33 @@ document.addEventListener('DOMContentLoaded', function() {
         let errorMessage = '';
 
         // Check if empty when required
-        if (rule.required && !input.value.trim()) {
+        if (rule.required && !field.value.trim()) {
             errorMessage = `This field is required`;
         }
         // Check custom validation if exists
-        else if (rule.validate && input.value.trim()) {
-            errorMessage = rule.validate(input.value.trim());
+        else if (rule.validate && field.value.trim()) {
+            errorMessage = rule.validate(field);
         }
         // Check pattern if exists
-        else if (rule.pattern && input.value.trim() && !rule.pattern.test(input.value.trim())) {
+        else if (rule.pattern && field.value.trim() && !rule.pattern.test(field.value.trim())) {
             errorMessage = rule.message;
         }
         // Check minLength if exists
-        else if (rule.minLength && input.value.trim().length < rule.minLength) {
+        else if (rule.minLength && field.value.trim().length < rule.minLength) {
             errorMessage = rule.message;
         }
 
         // Show/hide error message
-        errorSpan.textContent = errorMessage;
-        errorSpan.style.display = errorMessage ? 'block' : 'none';
+        errorElement.textContent = errorMessage;
+        errorElement.style.display = errorMessage ? 'block' : 'none';
 
         // Add/remove invalid class
         if (errorMessage) {
-            input.classList.add('is-invalid');
-            input.classList.remove('is-valid');
+            field.classList.add('is-invalid');
+            field.classList.remove('is-valid');
         } else {
-            input.classList.add('is-valid');
-            input.classList.remove('is-invalid');
+            field.classList.add('is-valid');
+            field.classList.remove('is-invalid');
         }
 
         return !errorMessage;
@@ -1155,7 +1233,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
         }
-});
+    });
 });
 </script>
 <script>

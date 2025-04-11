@@ -1123,7 +1123,7 @@ if (!preventDuplicateOrder($conn, $order_reference)) {
                             order_id: data.razorpay_order_id,
                             handler: function(response) {
                                 // This handles successful payment
-                                completePayment(response, data.order_id);
+                                handlePaymentSuccess(response);
                             },
                             prefill: {
                                 name: "<?php echo htmlspecialchars($user['name'] ?? 'Customer'); ?>",
@@ -1185,27 +1185,24 @@ if (!preventDuplicateOrder($conn, $order_reference)) {
             }
             
             // Function to complete payment after successful Razorpay payment
-            function completePayment(payment, orderId) {
-                // Create payment verification data
-                const verifyData = {
-                    razorpay_payment_id: payment.razorpay_payment_id,
-                    razorpay_order_id: payment.razorpay_order_id,
-                    razorpay_signature: payment.razorpay_signature,
-                    order_id: orderId
-                };
+            function handlePaymentSuccess(response) {
+                console.log('Payment successful:', response);
                 
-                // Convert to URL encoded string for POST
-                const formBody = Object.keys(verifyData)
-                    .map(key => encodeURIComponent(key) + '=' + encodeURIComponent(verifyData[key]))
-                    .join('&');
+                // Get the order ID from storage
+                const orderId = localStorage.getItem('current_order_id') || 
+                               sessionStorage.getItem('current_order_id');
+                
+                // Prepare verification data
+                const verificationData = new FormData();
+                verificationData.append('razorpay_payment_id', response.razorpay_payment_id);
+                verificationData.append('razorpay_order_id', response.razorpay_order_id);
+                verificationData.append('razorpay_signature', response.razorpay_signature);
+                verificationData.append('order_id', orderId);
                 
                 // Send verification request
                 fetch('verify_payment.php', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                    },
-                    body: formBody
+                    body: verificationData
                 })
                 .then(response => {
                     if (!response.ok) {
@@ -1219,21 +1216,43 @@ if (!preventDuplicateOrder($conn, $order_reference)) {
                     try {
                         const data = JSON.parse(text);
                         if (data.success) {
-                            window.location.href = 'confirmation.php?order_id=' + orderId;
+                            // Clear any stored order IDs
+                            localStorage.removeItem('current_order_id');
+                            sessionStorage.removeItem('current_order_id');
+                            
+                            // Store outfit_id in session storage
+                            if (data.outfit_id) {
+                                sessionStorage.setItem('current_outfit_id', data.outfit_id);
+                            }
+                            
+                            // Redirect to confirmation page with both IDs
+                            if (data.redirect_url) {
+                                window.location.href = data.redirect_url;
+                            } else {
+                                // Fallback if redirect_url is not provided
+                                const outfitId = data.outfit_id || <?php echo $outfit_id; ?>;
+                                window.location.href = 'confirmation.php?order_id=' + data.order_id + '&outfit_id=' + outfitId;
+                            }
                         } else {
                             throw new Error(data.message || 'Payment verification failed');
                         }
                     } catch (e) {
                         console.error('Error completing payment:', e);
-                        // Try to redirect anyway
-                        window.location.href = 'confirmation.php?order_id=' + orderId;
+                        // Try to redirect anyway if we have an order ID
+                        if (orderId) {
+                            const outfitId = <?php echo $outfit_id; ?>;
+                            window.location.href = 'confirmation.php?order_id=' + orderId + '&outfit_id=' + outfitId;
+                        }
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
                     alert('Your payment was processed, but we encountered an error. Please contact customer support.');
-                    // Try to redirect anyway
-                    window.location.href = 'confirmation.php?order_id=' + orderId;
+                    // Try to redirect anyway if we have an order ID
+                    if (orderId) {
+                        const outfitId = <?php echo $outfit_id; ?>;
+                        window.location.href = 'confirmation.php?order_id=' + orderId + '&outfit_id=' + outfitId;
+                    }
                 });
             }
         });

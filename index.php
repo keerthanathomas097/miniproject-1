@@ -1,5 +1,6 @@
 <?php
 session_start();
+include 'connect.php';
 
 // Simply check if logged in (no redirect)
 $logged_in = isset($_SESSION['loggedin']) && $_SESSION['loggedin'];
@@ -60,63 +61,199 @@ $user_role = $logged_in ? $_SESSION['role'] : '';
       .footer {
         background: linear-gradient(to right, #8b0000, #800000);
         color: #fff;
-        padding: 20px 0;
+        padding: 40px 0;
+        font-family: 'Jost', sans-serif;
       }
 
       .footer-container {
-        display: flex;
-        justify-content: space-between;
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 30px;
         max-width: 1200px;
         margin: 0 auto;
         padding: 0 20px;
       }
 
       .footer-section {
-        flex: 1;
-        min-width: 200px;
-        margin: 10px;
+        padding: 0 15px;
       }
 
       .footer-section h4 {
+        color: #fff;
+        font-size: 1.2rem;
+        margin-bottom: 20px;
+        font-weight: 500;
+        position: relative;
+      }
+
+      .footer-section h4:after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: -8px;
+        width: 30px;
+        height: 2px;
+        background-color: #fff;
+      }
+
+      .footer-section p {
         margin-bottom: 10px;
+        font-size: 0.9rem;
+        line-height: 1.6;
       }
 
       .footer-section ul {
         list-style-type: none;
         padding: 0;
+        margin: 0;
       }
 
       .footer-section ul li {
-        margin-bottom: 5px;
+        margin-bottom: 10px;
       }
 
       .footer-section ul li a {
         color: #fff;
         text-decoration: none;
+        font-size: 0.9rem;
+        transition: color 0.3s ease;
       }
 
       .footer-section ul li a:hover {
-        text-decoration: underline;
+        color: #f0f0f0;
+        text-decoration: none;
       }
 
       .social-media {
         display: flex;
-        justify-content: flex-start;
-        list-style-type: none;
-        padding: 0;
-      }
-
-      .social-media li {
-        margin-right: 10px;
+        gap: 15px;
       }
 
       .social-media li a {
-        color: #fff;
-        text-decoration: none;
+        font-size: 1.1rem;
       }
 
-      .social-media li a:hover {
-        text-decoration: underline;
+      @media (max-width: 992px) {
+        .footer-container {
+          grid-template-columns: repeat(3, 1fr);
+        }
+      }
+
+      @media (max-width: 768px) {
+        .footer-container {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      @media (max-width: 576px) {
+        .footer-container {
+          grid-template-columns: 1fr;
+        }
+        
+        .footer-section {
+          text-align: center;
+        }
+        
+        .footer-section h4:after {
+          left: 50%;
+          transform: translateX(-50%);
+        }
+        
+        .social-media {
+          justify-content: center;
+        }
+      }
+
+      .best-rentals {
+          padding: 60px 0;
+          background-color: #f8f9fa;
+      }
+
+      .section-title {
+          text-align: center;
+          margin-bottom: 40px;
+          color: #800020;
+          font-family: 'Marcellus', serif;
+          font-size: 2.5rem;
+          font-weight: 600;
+          position: relative;
+      }
+
+      .section-title:after {
+          content: '';
+          display: block;
+          width: 60px;
+          height: 3px;
+          background: #800020;
+          margin: 15px auto;
+      }
+
+      .outfit-card {
+          position: relative;
+          border-radius: 8px;
+          overflow: hidden;
+          box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+          transition: all 0.3s ease;
+          background: white;
+          height: 400px; /* Fixed height for uniform appearance */
+      }
+
+      .outfit-card:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+      }
+
+      .outfit-image {
+          display: block;
+          position: relative;
+          height: 100%;
+          width: 100%;
+          overflow: hidden;
+      }
+
+      .outfit-image img {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          transition: transform 0.5s ease;
+      }
+
+      .outfit-card:hover .outfit-image img {
+          transform: scale(1.05);
+      }
+
+      .no-image {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-color: #f0f0f0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #666;
+          font-style: italic;
+      }
+
+      .no-outfits {
+          text-align: center;
+          padding: 40px;
+          color: #666;
+          font-style: italic;
+      }
+
+      @media (max-width: 768px) {
+          .section-title {
+              font-size: 2rem;
+          }
+          
+          .outfit-card {
+              height: 350px;
+          }
       }
     </style>
   </head>
@@ -175,7 +312,9 @@ $user_role = $logged_in ? $_SESSION['role'] : '';
               <a href="lending.php" class="nav-link">EARN THROUGH US</a>
               <a href="outfit.php?gender=male" class="nav-link">MEN</a>
               <a href="outfit.php?occasion=wedding" class="nav-link">BRIDAL</a>
-              <a href="ls.php?showModal=true" class="nav-link">SIGN UP</a>
+              <?php if(!isset($_SESSION['loggedin']) || !$_SESSION['loggedin']): ?>
+                <a href="ls.php?showModal=true" class="nav-link">SIGN UP</a>
+              <?php endif; ?>
               
               <?php if(isset($_SESSION['loggedin']) && $_SESSION['loggedin']): ?>
                 <span class="nav-link"><?php echo htmlspecialchars($_SESSION['username']); ?></span>
@@ -370,47 +509,46 @@ $user_role = $logged_in ? $_SESSION['role'] : '';
       </section>
 
       <section class="best-rentals">
-        <h2>Best Rentals</h2>
-        <div class="bento-box-container">
-          <div class="bento-box">
-            <img
-              src="https://img.perniaspopupshop.com/catalog/product/s/a/SAKOM072456_1.jpg?impolicy=listingimagenew"
-              alt="Outfit 1"
-            />
-            <div class="info">
-              <h3>Outfit Name 1</h3>
-              <p>₹Price</p>
-            </div>
-          </div>
-          <div class="bento-box">
-            <img
-              src="https://qivii.com/cdn/shop/products/sabyasachi-art-silk-lehenga-choli-for-woman-designer-ghaghra-choli-indian-wedding-bridal-lahnga-choli-party-wear-silk-lengha-choli-ready-to-wear-qivii-1_1024x1024.jpg?v=1726015261"
-              alt="Outfit 2"
-            />
-            <div class="info">
-              <h3>Outfit Name 2</h3>
-              <p>₹Price</p>
-            </div>
-          </div>
-          <div class="bento-box">
-            <img
-              src="https://sabyasachi.com/cdn/shop/files/M230425-139-175_768x.jpg?v=1693911464"
-              alt="Outfit 3"
-            />
-            <div class="info">
-              <h3>Outfit Name 3</h3>
-              <p>₹Price</p>
-            </div>
-          </div>
-          <div class="bento-box">
-            <img
-              src="https://cdn.pixelbin.io/v2/black-bread-289bfa/t.resize(w:2500)/Manish_1/Evara_Sangeet_Part_1/MM-P-LH-60944-BL-DP_C-XS-1.jpg"
-              alt="Outfit 4"
-            />
-            <div class="info">
-              <h3>Outfit Name 4</h3>
-              <p>₹Price</p>
-            </div>
+        <div class="container">
+          <h2 class="section-title">Best Rentals</h2>
+          <div class="row g-4">
+            <?php
+            // Query to fetch 4 published outfits with their details
+            $best_outfits_query = "SELECT o.* 
+                                  FROM tbl_outfit o
+                                  WHERE o.status = 'approved' AND o.image1 IS NOT NULL
+                                  ORDER BY o.outfit_id DESC
+                                  LIMIT 4";
+            
+            $best_outfits_result = mysqli_query($conn, $best_outfits_query);
+            
+            if ($best_outfits_result && mysqli_num_rows($best_outfits_result) > 0) {
+                while ($outfit = mysqli_fetch_assoc($best_outfits_result)) {
+                    // Handle image path
+                    $imagePath = '';
+                    if (!empty($outfit['image1'])) {
+                        $baseImageNumber = str_replace('_image1.jpg', '', $outfit['image1']);
+                        $imagePath = 'uploads/' . $baseImageNumber . '_image1.jpg';
+                    }
+                    ?>
+                    <div class="col-lg-3 col-md-6">
+                        <div class="outfit-card">
+                            <?php if (!empty($imagePath) && file_exists($imagePath)): ?>
+                                <a href="rentnow.php?id=<?php echo $outfit['outfit_id']; ?>" class="outfit-image">
+                                    <img src="<?php echo htmlspecialchars($imagePath); ?>" 
+                                         alt="Outfit">
+                                </a>
+                            <?php else: ?>
+                                <div class="no-image">No Image Available</div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    <?php
+                }
+            } else {
+                echo '<div class="col-12"><p class="no-outfits">No outfits available at the moment.</p></div>';
+            }
+            ?>
           </div>
         </div>
       </section>

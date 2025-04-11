@@ -503,6 +503,25 @@ $price_result = $stmt->get_result();
                 margin-left: 200px;
             }
         }
+
+        /* Add these styles */
+        .form-group label.required::after {
+            content: " *";
+            color: red;
+        }
+        .invalid-feedback {
+            display: none;
+            color: #dc3545;
+            font-size: 80%;
+            margin-top: 0.25rem;
+        }
+        .is-invalid {
+            border-color: #dc3545 !important;
+        }
+        .publish-btn:disabled {
+            background-color: #cccccc !important;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body>
@@ -882,6 +901,101 @@ $(document).ready(function() {
         }
     });
 });
+    </script>
+    <script>
+        $(document).ready(function(){
+            // Auto-hide alerts after 5 seconds
+            setTimeout(function(){
+                $("#message-alert").alert('close');
+            }, 5000);
+
+            // Add validation for each form
+            $('.outfit-card form').each(function() {
+                const form = $(this);
+                const publishBtn = form.find('.publish-btn');
+                const description = form.find('textarea[name="description"]');
+                const gender = form.find('select[name="gender"]');
+                const priceRange = form.find('select[name="price_range"]');
+                const occasionChecks = form.find('input[name="occasion[]"]');
+
+                // Initially disable publish button
+                publishBtn.prop('disabled', true);
+
+                // Add required class to labels
+                form.find('label').addClass('required');
+
+                // Add validation messages
+                description.after('<div class="invalid-feedback">Please enter a description</div>');
+                gender.after('<div class="invalid-feedback">Please select a gender</div>');
+                priceRange.after('<div class="invalid-feedback">Please select a price range</div>');
+                occasionChecks.first().parent().parent().after('<div class="invalid-feedback">Please select at least one occasion</div>');
+
+                // Function to validate form
+                function validateForm() {
+                    let isValid = true;
+                    
+                    // Validate description (minimum 10 characters)
+                    if (description.val().trim().length < 10) {
+                        description.addClass('is-invalid');
+                        isValid = false;
+                    } else {
+                        description.removeClass('is-invalid');
+                    }
+
+                    // Validate gender
+                    if (!gender.val()) {
+                        gender.addClass('is-invalid');
+                        isValid = false;
+                    } else {
+                        gender.removeClass('is-invalid');
+                    }
+
+                    // Validate price range
+                    if (!priceRange.val()) {
+                        priceRange.addClass('is-invalid');
+                        isValid = false;
+                    } else {
+                        priceRange.removeClass('is-invalid');
+                    }
+
+                    // Validate occasions (at least one must be selected)
+                    if (!occasionChecks.is(':checked')) {
+                        occasionChecks.first().parent().parent().next('.invalid-feedback').css('display', 'block');
+                        isValid = false;
+                    } else {
+                        occasionChecks.first().parent().parent().next('.invalid-feedback').css('display', 'none');
+                    }
+
+                    // Enable/disable publish button based on validation
+                    publishBtn.prop('disabled', !isValid);
+
+                    return isValid;
+                }
+
+                // Add event listeners for real-time validation
+                description.on('input', validateForm);
+                gender.on('change', validateForm);
+                priceRange.on('change', validateForm);
+                occasionChecks.on('change', validateForm);
+
+                // Validate on form submission
+                form.on('submit', function(e) {
+                    if (!validateForm()) {
+                        e.preventDefault();
+                        // Scroll to first error
+                        const firstError = form.find('.is-invalid').first();
+                        if (firstError.length) {
+                            $('html, body').animate({
+                                scrollTop: firstError.offset().top - 100
+                            }, 500);
+                        }
+                    }
+                });
+
+                // Initial validation
+                validateForm();
+            });
+        });
     </script>
 </body>
 </html>

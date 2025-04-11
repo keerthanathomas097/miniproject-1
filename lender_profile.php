@@ -15,13 +15,22 @@ require_once 'connect.php';
 $lender_id = $_SESSION['id'];
 
 // Fetch lender details from tbl_users
-$query = "SELECT *, DATE_FORMAT(created_at, '%M %d, %Y') as join_date 
+$query = "SELECT name, email, phone, is_verified 
           FROM tbl_users 
           WHERE user_id = ?";
-$stmt = $conn->prepare($query);
-$stmt->bind_param("i", $lender_id);
-$stmt->execute();
-$lender = $stmt->get_result()->fetch_assoc();
+          
+if ($stmt = $conn->prepare($query)) {
+    $stmt->bind_param("i", $lender_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $lender = $result->fetch_assoc();
+    if (!$lender) {
+        die("User not found");
+    }
+    $stmt->close();
+} else {
+    die("Error preparing query: " . $conn->error);
+}
 
 // Fetch lender statistics from tbl_outfit
 $stats_query = "SELECT 
@@ -30,11 +39,22 @@ $stats_query = "SELECT
     SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending_outfits,
     SUM(CASE WHEN status = 'approved' THEN mrp * 0.2 ELSE 0 END) as potential_earnings
     FROM tbl_outfit 
-    WHERE user_id = ?";
-$stats_stmt = $conn->prepare($stats_query);
-$stats_stmt->bind_param("i", $lender_id);
-$stats_stmt->execute();
-$stats = $stats_stmt->get_result()->fetch_assoc();
+    WHERE email = ?";
+
+if ($stats_stmt = $conn->prepare($stats_query)) {
+    $stats_stmt->bind_param("s", $lender['email']);
+    $stats_stmt->execute();
+    $result = $stats_stmt->get_result();
+    $stats = $result->fetch_assoc();
+    $stats_stmt->close();
+} else {
+    $stats = array(
+        'total_outfits' => 0,
+        'approved_outfits' => 0,
+        'pending_outfits' => 0,
+        'potential_earnings' => 0
+    );
+}
 
 // Handle logout action
 if (isset($_POST['logout'])) {
@@ -233,27 +253,27 @@ if (isset($_POST['logout'])) {
             <p>Lender Dashboard</p>
         </div>
         <div class="sidebar-menu">
-        <a href="lender_dashboard.php" class="menu-item" style="text-decoration: none; color: white;">
+            <a href="lender_dashboard.php" class="menu-item" style="text-decoration: none; color: white;">
                 <i class="fas fa-home"></i> Dashboard
             </a>
             <a href="lending.php" class="menu-item" style="text-decoration: none; color: white;">
                 <i class="fas fa-plus-circle"></i> Lend Outfit
             </a>
-            <div class="menu-item">
+            <a href="my_outfits.php" class="menu-item" style="text-decoration: none; color: white;">
                 <i class="fas fa-tshirt"></i> My Outfits
-            </div>
-            <div class="menu-item">
+            </a>
+            <a href="current_rentals.php" class="menu-item" style="text-decoration: none; color: white;">
                 <i class="fas fa-exchange-alt"></i> Rentals
-            </div>
-            <div class="menu-item">
+            </a>
+            <a href="earnings.php" class="menu-item" style="text-decoration: none; color: white;">
                 <i class="fas fa-money-bill-wave"></i> Earnings
-            </div>
-            <a href="lender_profile.php" class="menu-item" style="text-decoration: none; color: white;">
+            </a>
+            <a href="lender_profile.php" class="menu-item active" style="text-decoration: none; color: white;">
                 <i class="fas fa-user"></i> Profile
             </a>
-            <div class="menu-item">
+            <a href="settings.php" class="menu-item" style="text-decoration: none; color: white;">
                 <i class="fas fa-cog"></i> Settings
-            </div>
+            </a>
         </div>
     </div>
     
@@ -289,10 +309,6 @@ if (isset($_POST['logout'])) {
                 <div class="info-item">
                     <label>Phone</label>
                     <span><?php echo htmlspecialchars($lender['phone']); ?></span>
-                </div>
-                <div class="info-item">
-                    <label>Member Since</label>
-                    <span><?php echo htmlspecialchars($lender['join_date']); ?></span>
                 </div>
                 <div class="info-item">
                     <label>Account Status</label>

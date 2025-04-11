@@ -145,7 +145,7 @@ echo " -->";
         <div class="accordion" id="filters">
           <?php
           // First fetch all categories
-          $category_query = "SELECT * FROM tbl_category";
+          $category_query = "SELECT * FROM tbl_category WHERE category_name != 'Price'";
           $category_result = mysqli_query($conn, $category_query);
           
           while($category = mysqli_fetch_assoc($category_result)) {
@@ -206,19 +206,18 @@ echo " -->";
                   <div class="accordion-body">
                       <div class="form-check">
                           <input class="form-check-input price-range" type="checkbox" 
-                                 value="0-1000" id="price1" data-type="price">
+                                 value="0-10000" id="price1" data-type="price">
                           <label class="form-check-label" for="price1">
-                              ₹0 - ₹1,000
+                              Below ₹10,000
                           </label>
                       </div>
                       <div class="form-check">
                           <input class="form-check-input price-range" type="checkbox" 
-                                 value="1001-2000" id="price2" data-type="price">
+                                 value="10001-100000" id="price2" data-type="price">
                           <label class="form-check-label" for="price2">
-                              ₹1,001 - ₹2,000
+                              Above ₹10,000
                           </label>
                       </div>
-                      <!-- Add more price ranges as needed -->
                   </div>
               </div>
           </div>
@@ -429,11 +428,7 @@ $(document).ready(function() {
     });
 
     // Filter functionality
-    $('.filter-checkbox').on('change', function() {
-        filterOutfits();
-    });
-
-    $('.price-range').on('change', function() {
+    $('.filter-checkbox, .price-range').on('change', function() {
         filterOutfits();
     });
 
@@ -455,12 +450,18 @@ $(document).ready(function() {
             filters[type].push(value);
         });
 
+        // Debug log
+        console.log('Sending filters:', filters);
+
         $.ajax({
             url: 'filter_outfits.php',
             method: 'POST',
             data: { filters: filters },
             success: function(response) {
                 $('#productGrid').html(response);
+            },
+            error: function(xhr, status, error) {
+                console.error('Filter error:', error);
             }
         });
     }

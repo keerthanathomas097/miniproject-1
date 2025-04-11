@@ -283,6 +283,44 @@ $outfit_images = $images_result->fetch_all(MYSQLI_ASSOC);
         position: relative;
         display: inline-block;
     }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+        position: relative;
+    }
+    
+    .invalid-feedback {
+        display: none;
+        color: #dc3545;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+
+    input:invalid + .invalid-feedback {
+        display: block;
+    }
+
+    input.is-invalid {
+        border-color: #dc3545;
+        padding-right: calc(1.5em + 0.75rem);
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right calc(0.375em + 0.1875rem) center;
+        background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+    }
+
+    input.is-valid {
+        border-color: #198754;
+        padding-right: calc(1.5em + 0.75rem);
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23198754' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right calc(0.375em + 0.1875rem) center;
+        background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+    }
+
+    .text-muted {
+        font-size: 0.875rem;
+    }
     </style>
     <script src="imageZoom.js"></script>
 </head>
@@ -310,9 +348,8 @@ $outfit_images = $images_result->fetch_all(MYSQLI_ASSOC);
                     <a href="ls.php?showModal=true" class="nav-link">SIGN UP</a>
                     
                     <div class="nav-icons">
-                        <a href="cart.php" class="icon-link position-relative">
+                        <a href="cart.php" class="icon-link">
                             <i class="bi bi-bag"></i>
-                            <span id="cartCount" class="cart-badge badge rounded-pill" style="display: none;">0</span>
                         </a>
                         <a href="profile.php" class="icon-link">
                             <i class="bi bi-person"></i>
@@ -389,9 +426,24 @@ $outfit_images = $images_result->fetch_all(MYSQLI_ASSOC);
                     <?php endif; ?>
                     
                     <!-- Size Chart Icon -->
-                    <div class="size-chart">
-                        <i class="fas fa-ruler"></i>
-                        <span>Size Chart</span>
+                    <div class="size-chart" style="margin-bottom: 20px;">
+                        <a href="#" id="sizeChartLink" style="text-decoration: none; color: var(--primary); display: flex; align-items: center;">
+                            <i class="fas fa-ruler" style="margin-right: 8px;"></i>
+                            <span>Size Chart</span>
+                        </a>
+                    </div>
+
+                    <!-- Size Chart Modal -->
+                    <div id="sizeChartModal" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); z-index: 1000; justify-content: center; align-items: center;">
+                        <div class="size-chart-modal" style="background-color: white; border-radius: 10px; width: 90%; max-width: 800px; position: relative;">
+                            <div class="modal-header" style="padding: 15px 20px; border-bottom: 1px solid #dee2e6; display: flex; justify-content: space-between; align-items: center;">
+                                <h3 style="margin: 0; color: var(--primary);">Size Chart</h3>
+                                <button class="close-modal" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #6c757d;">&times;</button>
+                            </div>
+                            <div class="modal-content" style="padding: 20px;">
+                                <img src="images/size_chart.jpg" alt="Size Chart" style="width: 100%; height: auto; border-radius: 5px;">
+                            </div>
+                        </div>
                     </div>
 
                     <form id="measurementForm" method="POST" action="save_measurements.php" class="<?php echo isset($_GET['on_lend']) && $_GET['on_lend'] == '1' ? 'form-disabled' : ''; ?>">
@@ -399,20 +451,24 @@ $outfit_images = $images_result->fetch_all(MYSQLI_ASSOC);
                     <div class="measurements-form">
                         <h4>Enter Your Measurements</h4>
                         <div class="form-group">
-                            <label>Height (inches)</label>
-                                <input type="number" class="form-control" name="height" required>
+                            <label>Height (inches) <span class="text-muted">(Range: 60-72 inches)</span></label>
+                            <input type="number" class="form-control" name="height" id="height" required min="60" max="72" step="0.1">
+                            <div class="invalid-feedback" id="heightError"></div>
                         </div>
                         <div class="form-group">
-                            <label>Shoulder Width (inches)</label>
-                                <input type="number" class="form-control" name="shoulder" required>
+                            <label>Shoulder Width (inches) <span class="text-muted">(Range: 14-18 inches)</span></label>
+                            <input type="number" class="form-control" name="shoulder" id="shoulder" required min="14" max="18" step="0.1">
+                            <div class="invalid-feedback" id="shoulderError"></div>
                         </div>
                         <div class="form-group">
-                            <label>Bust (inches)</label>
-                                <input type="number" class="form-control" name="bust" required>
+                            <label>Bust (inches) <span class="text-muted">(Range: 78-113 cm / 30-44 inches)</span></label>
+                            <input type="number" class="form-control" name="bust" id="bust" required min="30" max="44" step="0.1">
+                            <div class="invalid-feedback" id="bustError"></div>
                         </div>
                         <div class="form-group">
-                            <label>Waist (inches)</label>
-                                <input type="number" class="form-control" name="waist" required>
+                            <label>Waist (inches) <span class="text-muted">(Range: 63-98 cm / 25-39 inches)</span></label>
+                            <input type="number" class="form-control" name="waist" id="waist" required min="25" max="39" step="0.1">
+                            <div class="invalid-feedback" id="waistError"></div>
                         </div>
                     </div>
 
@@ -464,20 +520,19 @@ $outfit_images = $images_result->fetch_all(MYSQLI_ASSOC);
                         </div>
                     </div>
 
-                        <!-- Hidden inputs -->
-                        <input type="hidden" name="outfit_id" value="<?php echo $outfit_id; ?>">
-                        <input type="hidden" name="start_date" id="startDateInput">
-                        <input type="hidden" name="end_date" id="endDateInput">
-                        <input type="hidden" id="outfitId" value="<?php echo $outfit_id; ?>">
-                        <input type="hidden" id="userId" value="<?php echo isset($_SESSION['id']) ? $_SESSION['id'] : ''; ?>">
-                        
-                        <?php if (!$is_on_lend): ?>
-                            <div class="checkout-button-container" style="margin-top: 20px;">
-                                <button type="submit" class="submit-btn" id="proceedButton" style="width: 100%; padding: 15px;">
-                        <i class="bi bi-cart-plus"></i> Proceed to Checkout
-                    </button>
-                            </div>
-                        <?php endif; ?>
+                    <!-- Hidden inputs -->
+                    <input type="hidden" name="outfit_id" id="outfitId" value="<?php echo $outfit_id; ?>">
+                    <input type="hidden" name="start_date" id="startDateInput">
+                    <input type="hidden" name="end_date" id="endDateInput">
+                    <input type="hidden" id="userId" value="<?php echo isset($_SESSION['id']) ? $_SESSION['id'] : ''; ?>">
+                    
+                    <?php if (!$is_on_lend): ?>
+                        <div class="checkout-button-container" style="margin-top: 20px;">
+                            <button type="submit" class="submit-btn" id="proceedButton" style="width: 100%; padding: 15px;">
+                                <i class="bi bi-cart-plus"></i> Proceed to Checkout
+                            </button>
+                        </div>
+                    <?php endif; ?>
                     </form>
 
                     <?php if ($is_on_lend): ?>
@@ -1141,6 +1196,120 @@ $outfit_images = $images_result->fetch_all(MYSQLI_ASSOC);
                 proceedButton.style.display = 'none';
             }
         }
+    });
+
+    // Size Chart Modal Functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const sizeChartLink = document.getElementById('sizeChartLink');
+        const sizeChartModal = document.getElementById('sizeChartModal');
+        const closeModal = document.querySelector('.close-modal');
+
+        sizeChartLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            sizeChartModal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        });
+
+        closeModal.addEventListener('click', function() {
+            sizeChartModal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        });
+
+        sizeChartModal.addEventListener('click', function(e) {
+            if (e.target === sizeChartModal) {
+                sizeChartModal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+        });
+
+        // Close modal on ESC key press
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && sizeChartModal.style.display === 'flex') {
+                sizeChartModal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+        });
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Measurement validation ranges
+        const validationRanges = {
+            height: { min: 60, max: 72, name: 'Height' },
+            shoulder: { min: 14, max: 18, name: 'Shoulder width' },
+            bust: { min: 30, max: 44, name: 'Bust' },
+            waist: { min: 25, max: 39, name: 'Waist' }
+        };
+
+        // Function to validate measurement
+        function validateMeasurement(input, range) {
+            const value = parseFloat(input.value);
+            const errorDiv = document.getElementById(input.id + 'Error');
+            
+            // Clear previous validation states
+            input.classList.remove('is-invalid', 'is-valid');
+            
+            // Validate empty input
+            if (input.value === '') {
+                errorDiv.textContent = `${range.name} measurement is required`;
+                input.classList.add('is-invalid');
+                return false;
+            }
+            
+            // Validate number
+            if (isNaN(value)) {
+                errorDiv.textContent = 'Please enter a valid number';
+                input.classList.add('is-invalid');
+                return false;
+            }
+            
+            // Validate range
+            if (value < range.min || value > range.max) {
+                errorDiv.textContent = `${range.name} must be between ${range.min} and ${range.max} inches`;
+                input.classList.add('is-invalid');
+                return false;
+            }
+            
+            // If all validations pass
+            input.classList.add('is-valid');
+            return true;
+        }
+
+        // Add validation to each measurement input
+        Object.keys(validationRanges).forEach(field => {
+            const input = document.getElementById(field);
+            if (input) {
+                // Validate on input
+                input.addEventListener('input', function() {
+                    validateMeasurement(this, validationRanges[field]);
+                });
+                
+                // Validate on blur
+                input.addEventListener('blur', function() {
+                    validateMeasurement(this, validationRanges[field]);
+                });
+            }
+        });
+
+        // Form submission validation
+        const form = document.getElementById('measurementForm');
+        form.addEventListener('submit', function(e) {
+            let isValid = true;
+            
+            // Validate all measurements before submission
+            Object.keys(validationRanges).forEach(field => {
+                const input = document.getElementById(field);
+                if (input) {
+                    if (!validateMeasurement(input, validationRanges[field])) {
+                        isValid = false;
+                    }
+                }
+            });
+            
+            if (!isValid) {
+                e.preventDefault();
+                alert('Please correct the measurement errors before proceeding.');
+            }
+        });
     });
     </script>
 </body>

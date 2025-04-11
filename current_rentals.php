@@ -52,14 +52,22 @@ $totalRevenue = 0;
 try {
     // Count statistics
     $statsQuery = "SELECT 
-                    COUNT(DISTINCT order_reference) as total_orders,
-                    SUM(CASE WHEN o.order_status = 'CONFIRMED' THEN 1 ELSE 0 END) / COUNT(*) * COUNT(DISTINCT order_reference) as active_orders,
-                    SUM(CASE WHEN o.order_status = 'COMPLETED' THEN 1 ELSE 0 END) / COUNT(*) * COUNT(DISTINCT order_reference) as completed_orders,
-                    SUM(CASE WHEN o.order_status = 'CANCELLED' THEN 1 ELSE 0 END) / COUNT(*) * COUNT(DISTINCT order_reference) as cancelled_orders,
-                    SUM(o.amount) / COUNT(*) * COUNT(DISTINCT order_reference) as total_revenue
-                  FROM tbl_orders o
-                  JOIN tbl_outfit outfit ON o.outfit_id = outfit.outfit_id
-                  WHERE outfit.email = ?";
+                    COUNT(DISTINCT o.outfit_id) as total_orders,
+                    SUM(CASE WHEN o.order_status = 'CONFIRMED' THEN 1 ELSE 0 END) as active_orders,
+                    SUM(CASE WHEN o.order_status = 'COMPLETED' THEN 1 ELSE 0 END) as completed_orders,
+                    SUM(CASE WHEN o.order_status = 'CANCELLED' THEN 1 ELSE 0 END) as cancelled_orders,
+                    SUM(o.amount) as total_revenue
+                  FROM (
+                    SELECT o.*
+                    FROM tbl_orders o
+                    INNER JOIN (
+                        SELECT outfit_id, MAX(id) as max_id
+                        FROM tbl_orders
+                        GROUP BY outfit_id
+                    ) latest ON o.id = latest.max_id
+                    JOIN tbl_outfit outfit ON o.outfit_id = outfit.outfit_id
+                    WHERE outfit.email = ?
+                  ) o";
     
     $statsStmt = $conn->prepare($statsQuery);
     $statsStmt->bind_param("s", $lenderEmail);
@@ -113,6 +121,11 @@ try {
                 m.waist
                 
               FROM tbl_orders o
+              INNER JOIN (
+                  SELECT outfit_id, MAX(id) as max_id
+                  FROM tbl_orders
+                  GROUP BY outfit_id
+              ) latest ON o.id = latest.max_id
               JOIN tbl_outfit outfit ON o.outfit_id = outfit.outfit_id
               JOIN tbl_users renter ON o.user_id = renter.user_id
               LEFT JOIN tbl_description d ON outfit.description_id = d.id
@@ -121,7 +134,6 @@ try {
               LEFT JOIN tbl_subcategory size ON outfit.size_id = size.id
               LEFT JOIN tbl_measurements m ON m.user_id = o.user_id AND m.outfit_id = o.outfit_id
               WHERE outfit.email = ?
-              GROUP BY o.order_reference
               ORDER BY o.created_at DESC";
     
     $stmt = $conn->prepare($query);
@@ -637,8 +649,8 @@ try {
             <a href="earnings.php" class="menu-item" style="text-decoration: none; color: white;">
                 <i class="fas fa-money-bill-wave"></i> Earnings
             </a>
-            <a href="profile.php" class="menu-item" style="text-decoration: none; color: white;">
-                <i class="fas fa-user"></i> Profile 
+            <a href="lender_profile.php" class="menu-item" style="text-decoration: none; color: white;">
+                <i class="fas fa-user"></i> Profile
             </a>
             <a href="settings.php" class="menu-item" style="text-decoration: none; color: white;">
                 <i class="fas fa-cog"></i> Settings

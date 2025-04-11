@@ -2,7 +2,7 @@
 $servername = "localhost";
 $username = "root";
 $password = "";
-$database = "minipro"; // Ensure this matches the database name you created
+$database = "minipro1"; // Ensure this matches the database name you created
 
 // Connect to MySQL server and select the database
 $conn = new mysqli($servername, $username, $password, $database);

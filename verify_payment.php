@@ -36,10 +36,10 @@ try {
     // Update order status in database
     $query = "UPDATE tbl_orders SET 
                 payment_status = 'COMPLETED', 
-                            order_status = 'CONFIRMED', 
-                            razorpay_payment_id = ?, 
-                            updated_at = NOW() 
-                            WHERE id = ?";
+                order_status = 'CONFIRMED', 
+                razorpay_payment_id = ?, 
+                updated_at = NOW() 
+                WHERE id = ?";
                             
     $stmt = $conn->prepare($query);
     
@@ -55,6 +55,30 @@ try {
     
     $stmt->close();
     
+    // Get the outfit_id for this order
+    $outfit_query = "SELECT outfit_id FROM tbl_orders WHERE id = ?";
+    $outfit_stmt = $conn->prepare($outfit_query);
+    
+    if (!$outfit_stmt) {
+        throw new Exception("Error preparing outfit query: " . $conn->error);
+    }
+    
+    $outfit_stmt->bind_param("i", $order_id);
+    
+    if (!$outfit_stmt->execute()) {
+        throw new Exception("Error executing outfit query: " . $outfit_stmt->error);
+    }
+    
+    $outfit_result = $outfit_stmt->get_result();
+    $outfit_data = $outfit_result->fetch_assoc();
+    $outfit_id = $outfit_data['outfit_id'];
+    
+    $outfit_stmt->close();
+    
+    // Store order ID and outfit ID in session for confirmation page
+    $_SESSION['current_order_id'] = $order_id;
+    $_SESSION['current_outfit_id'] = $outfit_id;
+    
     // Add transaction record if you have a transactions table
     $check = $conn->query("SHOW TABLES LIKE 'tbl_transactions'");
     if ($check->num_rows > 0) {
@@ -64,19 +88,21 @@ try {
                          ) SELECT id, user_id, 'PAYMENT', payment_method, amount, 'COMPLETED', NOW()
                          FROM tbl_orders WHERE id = ?";
                          
-    $transaction_stmt = $conn->prepare($transaction_query);
+        $transaction_stmt = $conn->prepare($transaction_query);
         if ($transaction_stmt) {
             $transaction_stmt->bind_param("i", $order_id);
-    $transaction_stmt->execute();
-    $transaction_stmt->close();
+            $transaction_stmt->execute();
+            $transaction_stmt->close();
         }
     }
     
-    // Return success response
+    // Return success response with redirect URL including outfit_id
     echo json_encode([
         'success' => true, 
         'message' => 'Payment verified successfully',
-        'order_id' => $order_id
+        'order_id' => $order_id,
+        'outfit_id' => $outfit_id,
+        'redirect_url' => 'confirmation.php?order_id=' . $order_id . '&outfit_id=' . $outfit_id
     ]);
     
 } catch (Exception $e) {

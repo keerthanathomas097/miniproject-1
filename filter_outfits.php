@@ -28,8 +28,11 @@ foreach ($filters as $type => $values) {
             case 'price':
                 // Handle price range
                 foreach ($values as $priceRange) {
-                    list($min, $max) = explode('-', $priceRange);
-                    $conditions[] = "(o.mrp * 0.20) BETWEEN " . floatval($min) . " AND " . floatval($max);
+                    if ($priceRange === '0-10000') {
+                        $conditions[] = "o.mrp <= 50000"; // Since rental price is 20% of MRP, MRP should be 50000 for 10000 rental
+                    } else if ($priceRange === '10001-100000') {
+                        $conditions[] = "o.mrp > 50000";
+                    }
                 }
                 break;
         }

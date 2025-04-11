@@ -501,21 +501,21 @@ foreach ($outfits as $outfit) {
             <a href="lending.php" class="menu-item" style="text-decoration: none; color: white;">
                 <i class="fas fa-plus-circle"></i> Lend Outfit
             </a>
-            <a href="my_outfits.php" class="menu-item" style="text-decoration: none; color: white; background-color: var(--secondary);">
+            <a href="my_outfits.php" class="menu-item active" style="text-decoration: none; color: white; background-color: var(--secondary);">
                 <i class="fas fa-tshirt"></i> My Collection
             </a>
             <a href="current_rentals.php" class="menu-item" style="text-decoration: none; color: white;">
                 <i class="fas fa-exchange-alt"></i> Rentals
             </a>
-            <div class="menu-item">
+            <a href="earnings.php" class="menu-item" style="text-decoration: none; color: white;">
                 <i class="fas fa-money-bill-wave"></i> Earnings
-            </div>
-            <a href="lender_profile.php" class="menu-item" style="text-decoration: none; color: white;">
-                <i class="fas fa-user"></i> Profile 
             </a>
-            <div class="menu-item">
+            <a href="lender_profile.php" class="menu-item" style="text-decoration: none; color: white;">
+                <i class="fas fa-user"></i> Profile
+            </a>
+            <a href="settings.php" class="menu-item" style="text-decoration: none; color: white;">
                 <i class="fas fa-cog"></i> Settings
-            </div>
+            </a>
         </div>
     </div>
 

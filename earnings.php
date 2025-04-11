@@ -40,16 +40,24 @@ try {
 
     // Fetch earnings statistics
     $statsQuery = "SELECT 
-                    COUNT(DISTINCT o.id) as total_rentals,
+                    COUNT(DISTINCT o.outfit_id) as total_rentals,
                     SUM(o.rental_rate) as total_rental_amount,
                     SUM(o.rental_rate) * 0.30 as total_earnings,
                     COUNT(CASE WHEN o.order_status = 'COMPLETED' THEN 1 END) as completed_rentals,
                     COUNT(CASE WHEN o.order_status = 'CONFIRMED' THEN 1 END) as active_rentals,
                     COUNT(CASE WHEN MONTH(o.created_at) = MONTH(CURRENT_DATE()) THEN 1 END) as rentals_this_month,
                     SUM(CASE WHEN MONTH(o.created_at) = MONTH(CURRENT_DATE()) THEN o.rental_rate * 0.30 END) as earnings_this_month
-                  FROM tbl_orders o
-                  JOIN tbl_outfit outfit ON o.outfit_id = outfit.outfit_id
-                  WHERE outfit.email = ? AND o.order_status != 'CANCELLED'";
+                  FROM (
+                    SELECT o.*
+                    FROM tbl_orders o
+                    INNER JOIN (
+                        SELECT outfit_id, MAX(id) as max_id
+                        FROM tbl_orders
+                        GROUP BY outfit_id
+                    ) latest ON o.id = latest.max_id
+                    JOIN tbl_outfit outfit ON o.outfit_id = outfit.outfit_id
+                    WHERE outfit.email = ? AND o.order_status != 'CANCELLED'
+                  ) o";
     
     $statsStmt = $conn->prepare($statsQuery);
     $statsStmt->bind_param("s", $lenderEmail);
@@ -70,6 +78,11 @@ try {
                         d.description_text,
                         u.name as renter_name
                     FROM tbl_orders o
+                    INNER JOIN (
+                        SELECT outfit_id, MAX(id) as max_id
+                        FROM tbl_orders
+                        GROUP BY outfit_id
+                    ) latest ON o.id = latest.max_id
                     JOIN tbl_outfit outfit ON o.outfit_id = outfit.outfit_id
                     LEFT JOIN tbl_description d ON outfit.description_id = d.id
                     JOIN tbl_users u ON o.user_id = u.user_id

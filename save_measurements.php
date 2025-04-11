@@ -1,20 +1,22 @@
 <?php
-ob_start(); // Start output buffering
 session_start();
 include 'connect.php';
 
-// Clear any previous output
-ob_clean();
+// Prevent any output before headers
+ob_start();
+
+// Enable error reporting
+error_reporting(E_ALL);
+ini_set('display_errors', 0); // Disable display errors to prevent them from corrupting JSON
+
+// Set response header to JSON
 header('Content-Type: application/json');
 
-// Enable error reporting for debugging
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+// Clear any previous output
+ob_clean();
 
-// Debug logging
-error_log("POST data received: " . print_r($_POST, true));
-
-if (!isset($_SESSION['loggedin']) || !isset($_SESSION['id'])) {
+// Check if user is logged in
+if (!isset($_SESSION['id'])) {
     echo json_encode(['success' => false, 'message' => 'Please login first']);
     exit();
 }
@@ -22,16 +24,30 @@ if (!isset($_SESSION['loggedin']) || !isset($_SESSION['id'])) {
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     try {
         // Get and validate form data
-        $user_id = intval($_SESSION['id']);
+        $user_id = $_SESSION['id'];
         $outfit_id = isset($_POST['outfit_id']) ? intval($_POST['outfit_id']) : 0;
         $height = isset($_POST['height']) ? floatval($_POST['height']) : 0;
         $shoulder = isset($_POST['shoulder']) ? floatval($_POST['shoulder']) : 0;
         $bust = isset($_POST['bust']) ? floatval($_POST['bust']) : 0;
         $waist = isset($_POST['waist']) ? floatval($_POST['waist']) : 0;
-
-        // Debug log the received values
-        error_log("Received values - user_id: $user_id, outfit_id: $outfit_id, height: $height, shoulder: $shoulder, bust: $bust, waist: $waist");
         
+        // Get and validate dates
+        $start_date = isset($_POST['start_date']) ? $_POST['start_date'] : '';
+        $end_date = isset($_POST['end_date']) ? $_POST['end_date'] : '';
+
+        // Validate date format
+        $date_format = 'Y-m-d';
+        $start_date_obj = DateTime::createFromFormat($date_format, $start_date);
+        $end_date_obj = DateTime::createFromFormat($date_format, $end_date);
+
+        if (!$start_date_obj || !$end_date_obj) {
+            throw new Exception("Invalid date format. Expected format: YYYY-MM-DD");
+        }
+
+        // Format dates for MySQL
+        $start_date = $start_date_obj->format('Y-m-d');
+        $end_date = $end_date_obj->format('Y-m-d');
+
         // Validate required fields
         if ($outfit_id <= 0) {
             throw new Exception("Invalid outfit ID");
@@ -41,27 +57,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             throw new Exception("All measurements must be greater than 0");
         }
 
-        // Convert dates
-        $start_date_str = $_POST['start_date'] ?? '';
-        $end_date_str = $_POST['end_date'] ?? '';
-        
-        error_log("Received dates - start: $start_date_str, end: $end_date_str");
-
-        if (empty($start_date_str) || empty($end_date_str)) {
+        if (empty($start_date) || empty($end_date)) {
             throw new Exception("Dates are required");
-        }
-
-        // Convert dates to MySQL format
-        $start_date = date('Y-m-d', strtotime($start_date_str));
-        $end_date = date('Y-m-d', strtotime($end_date_str));
-
-        if ($start_date === false || $end_date === false) {
-            throw new Exception("Invalid date format");
         }
 
         // First, check if a measurement already exists for this user and outfit
         $check_query = "SELECT id FROM tbl_measurements WHERE user_id = ? AND outfit_id = ?";
         $check_stmt = $conn->prepare($check_query);
+        if (!$check_stmt) {
+            throw new Exception("Prepare failed: " . $conn->error);
+        }
         $check_stmt->bind_param("ii", $user_id, $outfit_id);
         $check_stmt->execute();
         $result = $check_stmt->get_result();
@@ -73,6 +78,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                          start_date = ?, end_date = ? 
                      WHERE user_id = ? AND outfit_id = ?";
             $stmt = $conn->prepare($query);
+            if (!$stmt) {
+                throw new Exception("Prepare failed: " . $conn->error);
+            }
             $stmt->bind_param("ddddssii", 
                 $height, $shoulder, $bust, $waist,
                 $start_date, $end_date, $user_id, $outfit_id
@@ -81,8 +89,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             // Insert new measurement
             $query = "INSERT INTO tbl_measurements 
                      (user_id, outfit_id, height, shoulder, bust, waist, start_date, end_date)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-$stmt = $conn->prepare($query);
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            $stmt = $conn->prepare($query);
+            if (!$stmt) {
+                throw new Exception("Prepare failed: " . $conn->error);
+            }
             $stmt->bind_param("iiddddss", 
                 $user_id, $outfit_id, $height, $shoulder, $bust, $waist,
                 $start_date, $end_date
@@ -90,10 +101,10 @@ $stmt = $conn->prepare($query);
         }
 
         // Execute the query and check for success
-if ($stmt->execute()) {
-            error_log("Successfully saved measurements to database");
+        if ($stmt->execute()) {
+            ob_clean(); // Clear any potential output before sending JSON
             echo json_encode([
-        'success' => true,
+                'success' => true,
                 'redirect' => 'checkout.php?outfit_id=' . $outfit_id,
                 'message' => 'Measurements saved successfully'
             ]);
@@ -102,20 +113,20 @@ if ($stmt->execute()) {
         }
 
     } catch (Exception $e) {
-        error_log("Error in save_measurements.php: " . $e->getMessage());
+        ob_clean(); // Clear any potential output before sending JSON
         echo json_encode([
             'success' => false,
             'message' => $e->getMessage()
         ]);
     }
 } else {
+    ob_clean(); // Clear any potential output before sending JSON
     echo json_encode([
         'success' => false,
         'message' => 'Invalid request method'
     ]);
 }
 
-// Debug log the final response
-error_log("Script completed execution");
-exit();
+// End output buffering and flush
+ob_end_flush();
 ?>

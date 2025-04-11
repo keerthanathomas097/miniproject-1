@@ -89,28 +89,28 @@ $query = "SELECT
     o.payment_status,
     o.created_at as order_date,
     o.notes,
-    
-    outfit.outfit_id,
+    o.outfit_id,
+    o.user_id,
     outfit.mrp,
     outfit.image1,
     outfit.email as lender_email,
-    
     customer.name as customer_name,
     customer.email as customer_email,
     customer.phone as customer_phone,
-    
     lender.name as lender_name,
     lender.phone as lender_phone,
-    
     d.description_text,
     brand.subcategory_name as brand_name,
     type.subcategory_name as outfit_type,
     size.subcategory_name as size,
-    
     m.start_date,
     m.end_date
-    
 FROM tbl_orders o
+INNER JOIN (
+    SELECT outfit_id, MAX(id) as max_id
+    FROM tbl_orders
+    GROUP BY outfit_id
+) latest ON o.outfit_id = latest.outfit_id AND o.id = latest.max_id
 JOIN tbl_outfit outfit ON o.outfit_id = outfit.outfit_id
 JOIN tbl_users customer ON o.user_id = customer.user_id
 JOIN tbl_users lender ON outfit.email = lender.email
@@ -118,8 +118,35 @@ LEFT JOIN tbl_description d ON outfit.description_id = d.id
 LEFT JOIN tbl_subcategory brand ON outfit.brand_id = brand.id
 LEFT JOIN tbl_subcategory type ON outfit.type_id = type.id
 LEFT JOIN tbl_subcategory size ON outfit.size_id = size.id
-LEFT JOIN tbl_measurements m ON o.user_id = m.user_id AND o.outfit_id = m.outfit_id
-ORDER BY o.created_at DESC";
+LEFT JOIN (
+    SELECT m1.*
+    FROM tbl_measurements m1
+    INNER JOIN (
+        SELECT user_id, outfit_id, MAX(id) as max_id
+        FROM tbl_measurements
+        GROUP BY user_id, outfit_id
+    ) m2 ON m1.id = m2.max_id
+) m ON o.user_id = m.user_id AND o.outfit_id = m.outfit_id
+ORDER BY o.created_at DESC, o.id DESC";
+
+// Add debugging code to check for duplicates
+$debug_query = "SELECT outfit_id, COUNT(*) as count 
+               FROM tbl_orders 
+               GROUP BY outfit_id 
+               HAVING COUNT(*) > 1";
+try {
+    $debug_result = $conn->query($debug_query);
+    if ($debug_result && $debug_result->num_rows > 0) {
+        echo "<div class='alert alert-warning'>";
+        echo "<h4>Debug: Found duplicate outfit IDs:</h4>";
+        while ($row = $debug_result->fetch_assoc()) {
+            echo "Outfit ID: " . $row['outfit_id'] . " (Count: " . $row['count'] . ")<br>";
+        }
+        echo "</div>";
+    }
+} catch (Exception $e) {
+    // Silently handle debug query errors
+}
 
 try {
     $result = $conn->query($query);
@@ -1155,5 +1182,4 @@ try {
         }
     </script>
 </body>
-</html>
 </html>
